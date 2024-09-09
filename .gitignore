@@ -33,15 +33,10 @@ yarn-error.log*
 gcp-service-account.json
 
 # data
-
+knexfile.js
 db/data/*.geojson
 db/data/*.csv
 scratch.*
 explain.sql
 analyze.json
 
-# malware-scanner
-
-malware-scanner/cvds
-malware-scanner/pyenv
-malware-scanner/node_modules
