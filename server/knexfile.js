@@ -40,7 +40,7 @@ module.exports = {
       database: 'hocr_map',
       user:     'postgres',
       password: 's/.HhnxSVo1bl#D(',
-      host: '/cloudsql/playgrounderbackend:us-east1:playgrounderbackend-prod',
+      host: '/cloudsql/hocr-map:us-east1:hocr-map-prod',
       port: 5432
     },
     pool: {
