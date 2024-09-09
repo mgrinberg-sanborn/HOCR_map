@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 const db = require('./db'); // Import the knex instance
 
 const app = express();
@@ -8,46 +9,38 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/', async (req, res) => {
-    res.send('Hello World');
-});
+// Serve static files from the Vite build directory
+app.use(express.static(path.join(__dirname, 'dist')));
 
-// Fetch all boats
-app.get('/boats', async (req, res) => {
+// API routes
+app.get('/api/boats', async (req, res) => {
   const boats = await db('boats').select();
   res.json(boats);
 });
 
-// Fetch boats for a specific view
-app.get('/boats_view/:view', async (req, res) => {
+app.get('/api/boats_view/:view', async (req, res) => {
   const { view } = req.params;
   const boatsView = await db('boats_view')
-  .join('boats', 'boats_view.boat_id', '=', 'boats.id')
-  .where({ view_name: view });
+    .join('boats', 'boats_view.boat_id', '=', 'boats.id')
+    .where({ view_name: view });
   res.json(boatsView);
 });
 
-app.post('/boats_view/insert', async (req, res) => {
+app.post('/api/boats_view/insert', async (req, res) => {
   const { boat_id, lat, lon, view } = req.body;
 
   try {
-    // Check if the boat already exists in the 'boats_view' table for the given view
     const existingBoat = await db('boats_view')
       .where({ boat_id, view_name: view })
       .first();
 
     if (existingBoat) {
-      // Update the boat's position
       await db('boats_view')
         .where({ boat_id, view_name: view })
-        .update({
-          lat,
-          lon,
-        });
+        .update({ lat, lon });
 
       res.status(200).send('Boat position updated');
     } else {
-      // Insert a new boat position
       await db('boats_view').insert({
         boat_id,
         lat,
@@ -63,8 +56,13 @@ app.post('/boats_view/insert', async (req, res) => {
   }
 });
 
+// Redirect all other routes to the Vite build
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 if (require.main === module) {
-    app.listen(3001, () => console.log('HOCR Map Server running on port 3001'));
+  app.listen(8080, () => console.log('HOCR Map Server running on port 8080'));
 }
 
 module.exports = app; // Export the app for testing

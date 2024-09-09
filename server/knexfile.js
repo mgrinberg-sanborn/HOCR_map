@@ -35,11 +35,13 @@ module.exports = {
   },
 
   production: {
-    client: 'postgresql',
+    client: 'pg',
     connection: {
-      database: 'my_db',
-      user:     'username',
-      password: 'password'
+      database: 'hocr_map',
+      user:     'postgres',
+      password: 's/.HhnxSVo1bl#D(',
+      host: '34.148.103.254',
+      port: 5432
     },
     pool: {
       min: 2,

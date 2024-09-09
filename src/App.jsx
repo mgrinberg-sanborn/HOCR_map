@@ -22,14 +22,14 @@ function App() {
 
   // Fetch boats for dragging
   useEffect(() => {
-    axios.get('http://localhost:3001/boats').then((response) => {
+    axios.get('/api/boats').then((response) => {
       setBoats(response.data);
     });
   }, []);
 
   // Fetch boats for the map
   useEffect(() => {
-    axios.get('http://localhost:3001/boats_view/Parking').then((response) => {
+    axios.get('/api/boats_view/Parking').then((response) => {
       const boatData = response.data;
       setMapBoats(boatData);
 
@@ -62,7 +62,7 @@ function App() {
           const [lon, lat] = toLonLat(geometry.getCoordinates());
           const boatId = feature.get('id');
 
-          axios.post('http://localhost:3001/boats_view/insert', {
+          axios.post('/api/boats_view/insert', {
             boat_id: boatId,
             lat,
             lon,
@@ -119,7 +119,7 @@ function App() {
     vectorSourceRef.current.addFeatures([boatFeature]);
     map.updateSize(); // Refresh the map
 
-    axios.post('http://localhost:3001/boats_view/insert', {
+    axios.post('/api/boats_view/insert', {
       boat_id: boatId,
       lat: coordinates[1],
       lon: coordinates[0],

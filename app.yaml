@@ -1,0 +1,3 @@
+runtime: nodejs20 # Specify the Node.js version you are using
+env_variables:
+  NODE_ENV: 'production'
