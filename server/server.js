@@ -27,7 +27,7 @@ app.get('/api/boats_view/:view', async (req, res) => {
 });
 
 app.post('/api/boats_view/insert', async (req, res) => {
-  const { boat_id, lat, lon, view } = req.body;
+  const { boat_id, lat, lon, view, rotation } = req.body;
 
   try {
     const existingBoat = await db('boats_view')
@@ -37,7 +37,7 @@ app.post('/api/boats_view/insert', async (req, res) => {
     if (existingBoat) {
       await db('boats_view')
         .where({ boat_id, view_name: view })
-        .update({ lat, lon });
+        .update({ lat, lon, rotation });
 
       res.status(200).send('Boat position updated');
     } else {
@@ -46,6 +46,7 @@ app.post('/api/boats_view/insert', async (req, res) => {
         lat,
         lon,
         view_name: view,
+        rotation
       });
 
       res.status(200).send('Boat position inserted');

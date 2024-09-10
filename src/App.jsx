@@ -13,12 +13,11 @@ import { Modify } from 'ol/interaction';
 import axios from 'axios';
 
 function App() {
-  const [boats, setBoats] = useState([]); // Draggable boats from /boats
-  const [mapBoats, setMapBoats] = useState([]); // Boats on the map from boats_view
+  const [boats, setBoats] = useState([]); // Draggable boats
+  const [mapBoats, setMapBoats] = useState([]); // Boats on the map
   const mapRef = useRef(null);
   const mapElementRef = useRef(null);
   const vectorSourceRef = useRef(new VectorSource());
-  const [draggingBoat, setDraggingBoat] = useState(null);
 
   // Fetch boats for dragging
   useEffect(() => {
@@ -61,30 +60,77 @@ function App() {
           const geometry = feature.getGeometry();
           const [lon, lat] = toLonLat(geometry.getCoordinates());
           const boatId = feature.get('id');
+          const rotation = feature.get('rotation') || 0; // Get the rotation from the feature
 
           axios.post('/api/boats_view/insert', {
             boat_id: boatId,
             lat,
             lon,
+            rotation, // Include rotation in the request
             view: 'Parking',
           }).then((response) => {
-            console.log('Boat position updated:', response);
+            console.log('Boat position and rotation updated:', response);
           }).catch((error) => {
-            console.error('Error updating boat position:', error);
+            console.error('Error updating boat position and rotation:', error);
           });
         });
       });
+
+      // Add click event to the map for rotating boats
+      mapRef.current.on('click', (event) => {
+        if (event.originalEvent.shiftKey) {
+          const clickedFeature = mapRef.current.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+
+          if (clickedFeature) {
+            const currentStyle = clickedFeature.getStyle();
+            const currentRotation = clickedFeature.get('rotation') || 0; // Get rotation from feature property
+            const newRotation = currentRotation + (20 * Math.PI / 180); // Rotate by 10 degrees
+
+            // Update the feature's rotation property
+            clickedFeature.set('rotation', newRotation);
+
+            // Update the style with the new rotation
+            clickedFeature.setStyle(
+              new Style({
+                image: new Icon({
+                  src: currentStyle.getImage().getSrc(),
+                  scale: currentStyle.getImage().getScale(),
+                  rotation: newRotation,
+                }),
+              })
+            );
+
+            mapRef.current.render(); // Force the map to re-render with the updated rotation
+
+            // Optionally, update the rotation on click
+            const [lon, lat] = toLonLat(clickedFeature.getGeometry().getCoordinates());
+            console.log(newRotation);
+            axios.post('/api/boats_view/insert', {
+              boat_id: clickedFeature.get('id'),
+              lat,
+              lon,
+              rotation: newRotation, // Send the new rotation
+              view: 'Parking',
+            }).then((response) => {
+              console.log('Boat rotation updated:', response);
+            }).catch((error) => {
+              console.error('Error updating boat rotation:', error);
+            });
+          }
+        }
+      });
     }
-  }, [draggingBoat]);
+  }, []);
 
   // Common function to create boat features
   const createBoatFeature = (boat) => {
-    const { lat, lon, name, id } = boat;
+    const { lat, lon, name, id, rotation = 0 } = boat; // Default rotation to 0
     const boatCoordinates = fromLonLat([lon, lat]);
 
     const boatFeature = new Feature({
       geometry: new Point(boatCoordinates),
       id, // Store the boat ID for later use
+      rotation, // Store rotation in the feature
     });
 
     const svgIcon = `
@@ -101,37 +147,12 @@ function App() {
         image: new Icon({
           src: svgIconDataURL,
           scale: 1,
-          rotation: -20 * (Math.PI / 180),
+          rotation, // Initial rotation
         }),
       })
     );
 
     return boatFeature;
-  };
-
-  // Function to handle boat drop on the map
-  const handleBoatDrop = (e, boatId, boatName) => {
-    const map = mapRef.current;
-    const pixel = map.getEventPixel(e);
-    const coordinates = toLonLat(map.getCoordinateFromPixel(pixel));
-
-    const boatFeature = createBoatFeature({ lat: coordinates[1], lon: coordinates[0], name: boatName, id: boatId });
-    vectorSourceRef.current.addFeatures([boatFeature]);
-    map.updateSize(); // Refresh the map
-
-    axios.post('/api/boats_view/insert', {
-      boat_id: boatId,
-      lat: coordinates[1],
-      lon: coordinates[0],
-      view: 'Parking',
-    }).then((response) => {
-      console.log('Boat position updated', response);
-
-      // Remove the boat from the toolbar
-      setBoats(prevBoats => prevBoats.filter(boat => boat.id !== boatId));
-    }).catch((error) => {
-      console.error('Error updating boat position', error);
-    });
   };
 
   const boatsOnMap = new Set(mapBoats.map(boat => boat.id));
@@ -147,9 +168,7 @@ function App() {
             <div
               key={boat.id}
               draggable
-              onDragEnd={(e) => {
-                handleBoatDrop(e, boat.id, boat.name);  // Pass the event, boat ID, and name
-              }}
+              onDragEnd={(e) => handleBoatDrop(e, boat.id, boat.name)}
             >
               <svg width="50" height="20" xmlns="http://www.w3.org/2000/svg">
                 <rect x="10" width="35" height="20" fill="yellow"/>
