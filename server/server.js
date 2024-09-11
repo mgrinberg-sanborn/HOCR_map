@@ -14,8 +14,16 @@ app.use(express.static(path.join(__dirname, '..', 'dist'))); // Adjust path to t
 
 // API routes
 app.get('/api/boats', async (req, res) => {
-  const boats = await db('boats').select();
-  res.json(boats);
+  try {
+    const boats = await db('boats')
+      .orderBy('category') // Order by category first
+      .orderBy('number', 'asc'); // Order by number field in ascending order (change 'asc' to 'desc' if you want descending)
+    
+    res.json(boats);
+  } catch (error) {
+    console.error('Error fetching boats:', error);
+    res.status(500).json({ error: 'An error occurred while fetching boats.' });
+  }
 });
 
 app.get('/api/boats_view/:view', async (req, res) => {
