@@ -45,8 +45,8 @@ app.post('/api/boats_view/insert', async (req, res) => {
         boat_id,
         lat,
         lon,
+        rotation,
         view_name: view,
-        rotation
       });
 
       res.status(200).send('Boat position inserted');

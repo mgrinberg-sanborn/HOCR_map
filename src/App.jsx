@@ -11,30 +11,30 @@ import { fromLonLat, toLonLat } from 'ol/proj';
 import { Style, Icon } from 'ol/style';
 import { Modify } from 'ol/interaction';
 import axios from 'axios';
+import './App.css'; // Import the CSS file
 
 function App() {
-  const [boats, setBoats] = useState([]); // Draggable boats
-  const [mapBoats, setMapBoats] = useState([]); // Boats on the map
+  const [boats, setBoats] = useState([]);
+  const [mapBoats, setMapBoats] = useState([]);
   const mapRef = useRef(null);
   const mapElementRef = useRef(null);
   const vectorSourceRef = useRef(new VectorSource());
 
-  // Fetch boats for dragging
   useEffect(() => {
     axios.get('/api/boats').then((response) => {
       setBoats(response.data);
     });
   }, []);
 
-  // Fetch boats for the map
   useEffect(() => {
     axios.get('/api/boats_view/Parking').then((response) => {
       const boatData = response.data;
       setMapBoats(boatData);
 
       const features = boatData.map(createBoatFeature);
+      vectorSourceRef.current.clear(); // Clear existing features before adding new ones
       vectorSourceRef.current.addFeatures(features);
-      mapRef.current.render(); // Ensure the map is refreshed
+      mapRef.current.render();
     });
 
     if (!mapRef.current) {
@@ -60,13 +60,13 @@ function App() {
           const geometry = feature.getGeometry();
           const [lon, lat] = toLonLat(geometry.getCoordinates());
           const boatId = feature.get('id');
-          const rotation = feature.get('rotation') || 0; // Get the rotation from the feature
+          const rotation = feature.get('rotation') || 0;
 
           axios.post('/api/boats_view/insert', {
             boat_id: boatId,
             lat,
             lon,
-            rotation, // Include rotation in the request
+            rotation,
             view: 'Parking',
           }).then((response) => {
             console.log('Boat position and rotation updated:', response);
@@ -76,20 +76,17 @@ function App() {
         });
       });
 
-      // Add click event to the map for rotating boats
       mapRef.current.on('click', (event) => {
         if (event.originalEvent.shiftKey) {
           const clickedFeature = mapRef.current.forEachFeatureAtPixel(event.pixel, (feature) => feature);
 
           if (clickedFeature) {
             const currentStyle = clickedFeature.getStyle();
-            const currentRotation = clickedFeature.get('rotation') || 0; // Get rotation from feature property
-            const newRotation = currentRotation + (20 * Math.PI / 180); // Rotate by 10 degrees
+            const currentRotation = clickedFeature.get('rotation') || 0;
+            const newRotation = currentRotation + (20 * Math.PI / 180);
 
-            // Update the feature's rotation property
             clickedFeature.set('rotation', newRotation);
 
-            // Update the style with the new rotation
             clickedFeature.setStyle(
               new Style({
                 image: new Icon({
@@ -100,15 +97,14 @@ function App() {
               })
             );
 
-            mapRef.current.render(); // Force the map to re-render with the updated rotation
+            mapRef.current.render();
 
-            // Optionally, update the rotation on click
             const [lon, lat] = toLonLat(clickedFeature.getGeometry().getCoordinates());
             axios.post('/api/boats_view/insert', {
               boat_id: clickedFeature.get('id'),
               lat,
               lon,
-              rotation: newRotation, // Send the new rotation
+              rotation: newRotation,
               view: 'Parking',
             }).then((response) => {
               console.log('Boat rotation updated:', response);
@@ -121,18 +117,17 @@ function App() {
     }
   }, []);
 
-  // Common function to create boat features
   const createBoatFeature = (boat) => {
-    const { lat, lon, name, id, category, rotation = 0 } = boat; // Default rotation to 0
+    const { lat, lon, name, id, rotation = 0, category } = boat;
     const boatCoordinates = fromLonLat([lon, lat]);
 
     const boatFeature = new Feature({
       geometry: new Point(boatCoordinates),
-      id, // Store the boat ID for later use
-      rotation, // Store rotation in the feature
+      id,
+      rotation,
     });
 
-    const fillColor = category === 'SL' ? 'red' : 'yellow'; // Red if category is 'SL', otherwise yellow
+    const fillColor = category === 'SL' ? 'red' : 'yellow';
 
     const svgIcon = `
       <svg width="50" height="20" xmlns="http://www.w3.org/2000/svg">
@@ -148,7 +143,7 @@ function App() {
         image: new Icon({
           src: svgIconDataURL,
           scale: 1,
-          rotation, // Initial rotation
+          rotation,
         }),
       })
     );
@@ -159,15 +154,39 @@ function App() {
   const boatsOnMap = new Set(mapBoats.map(boat => boat.id));
   const draggableBoats = boats.filter(boat => !boatsOnMap.has(boat.id));
 
+  const handleBoatDrop = (e, boatId, boatName) => {
+    const map = mapRef.current;
+    const pixel = map.getEventPixel(e);
+    const coordinates = toLonLat(map.getCoordinateFromPixel(pixel));
+
+    const boatFeature = createBoatFeature({ lat: coordinates[1], lon: coordinates[0], name: boatName, id: boatId });
+    vectorSourceRef.current.addFeature(boatFeature);
+    map.updateSize();
+
+    axios.post('/api/boats_view/insert', {
+      boat_id: boatId,
+      lat: coordinates[1],
+      lon: coordinates[0],
+      view: 'Parking',
+    }).then((response) => {
+      console.log('Boat position updated', response);
+
+      setBoats(prevBoats => prevBoats.filter(boat => boat.id !== boatId));
+    }).catch((error) => {
+      console.error('Error updating boat position', error);
+    });
+  };
+
   return (
     <div>
       <div ref={mapElementRef} style={{ width: '100%', height: '80vh' }}></div>
-      <div style={{ padding: '10px', background: '#f0f0f0' }}>
+      <div className="boat-toolbar">
         <h3>Boats</h3>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="boat-list">
           {draggableBoats.map((boat) => (
             <div
               key={boat.id}
+              className="boat-item"
               draggable
               onDragEnd={(e) => handleBoatDrop(e, boat.id, boat.name)}
             >
