@@ -47,7 +47,8 @@ function App() {
         view: new View({
           center: fromLonLat([-71.0969, 42.3553]),
           zoom: 20,
-        }),
+          maxZoom: 20,
+          minZoom: 20       }),
       });
 
       mapRef.current = olMap;
