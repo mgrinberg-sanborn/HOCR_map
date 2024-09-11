@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "NODE_ENV=development jest",
-    "deploy": "vite build && gcloud app deploy app.yaml --project hocr-map && say 'HOCR Map Deployed"
+    "deploy": "vite build && gcloud app deploy app.yaml --project hocr-map && say 'HOCR Map Deployed'"
   },
   "nodemonConfig": {
     "ignore": [

@@ -104,7 +104,6 @@ function App() {
 
             // Optionally, update the rotation on click
             const [lon, lat] = toLonLat(clickedFeature.getGeometry().getCoordinates());
-            console.log(newRotation);
             axios.post('/api/boats_view/insert', {
               boat_id: clickedFeature.get('id'),
               lat,
@@ -124,7 +123,7 @@ function App() {
 
   // Common function to create boat features
   const createBoatFeature = (boat) => {
-    const { lat, lon, name, id, rotation = 0 } = boat; // Default rotation to 0
+    const { lat, lon, name, id, category, rotation = 0 } = boat; // Default rotation to 0
     const boatCoordinates = fromLonLat([lon, lat]);
 
     const boatFeature = new Feature({
@@ -133,10 +132,12 @@ function App() {
       rotation, // Store rotation in the feature
     });
 
+    const fillColor = category === 'SL' ? 'red' : 'yellow'; // Red if category is 'SL', otherwise yellow
+
     const svgIcon = `
       <svg width="50" height="20" xmlns="http://www.w3.org/2000/svg">
-        <rect x="10" width="35" height="20" fill="yellow"/>
-        <polygon points="10,0 0,10 10,20" fill="yellow"/>
+        <rect x="10" width="35" height="20" fill="${fillColor}"/>
+        <polygon points="10,0 0,10 10,20" fill="${fillColor}"/>
         <text x="25" y="14" font-size="12" fill="black" font-family="Arial" text-anchor="middle">${name}</text>
       </svg>`;
 
@@ -171,8 +172,8 @@ function App() {
               onDragEnd={(e) => handleBoatDrop(e, boat.id, boat.name)}
             >
               <svg width="50" height="20" xmlns="http://www.w3.org/2000/svg">
-                <rect x="10" width="35" height="20" fill="yellow"/>
-                <polygon points="10,0 0,10 10,20" fill="yellow"/>
+                <rect x="10" width="35" height="20" fill={boat.category === 'SL' ? 'red' : 'yellow'}/>
+                <polygon points="10,0 0,10 10,20" fill={boat.category === 'SL' ? 'red' : 'yellow'}/>
                 <text x="25" y="14" font-size="12" fill="black" font-family="Arial" text-anchor="middle">{boat.name}</text>
               </svg>
             </div>
