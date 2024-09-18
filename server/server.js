@@ -30,6 +30,7 @@ app.get('/api/boats_view/:view', async (req, res) => {
   const { view } = req.params;
   const boatsView = await db('boats_view')
     .join('boats', 'boats_view.boat_id', '=', 'boats.id')
+    .select('boats_view.id', 'boats_view.lat', 'boats_view.lon', 'boats_view.boat_id', 'boats.name', 'boats.category')
     .where({ view_name: view });
   res.json(boatsView);
 });
@@ -69,6 +70,29 @@ app.post('/api/boats_view/insert', async (req, res) => {
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html')); // Adjust path to the dist directory
 });
+
+// Delete a boat from the view
+app.delete('/api/boats_view/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Delete the boat from the boats_view table based on the boat_id
+    const deletedRows = await db('boats_view')
+      .where({ id })
+      .del();
+
+    if (deletedRows) {
+      res.status(200).json({ success: true, message: 'Boat deleted successfully' });
+    } else {
+      res.status(404).json({ success: false, message: 'Boat not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting boat:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete boat' });
+  }
+});
+
+
 
 if (require.main === module) {
   app.listen(8080, () => console.log('HOCR Map Server running on port 8080'));
