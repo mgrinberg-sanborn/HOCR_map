@@ -9,9 +9,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-// Serve static files from the Vite build directory
-app.use(express.static(path.join(__dirname, '..', 'dist'))); // Adjust path to the dist directory
-
 // API routes
 app.get('/api/boats', async (req, res) => {
   try {
@@ -66,10 +63,6 @@ app.post('/api/boats_view/insert', async (req, res) => {
   }
 });
 
-// Redirect all other routes to the Vite build
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html')); // Adjust path to the dist directory
-});
 
 // Delete a boat from the view
 app.delete('/api/boats_view/:id', async (req, res) => {
@@ -92,7 +85,11 @@ app.delete('/api/boats_view/:id', async (req, res) => {
   }
 });
 
+app.use(express.static(path.join(__dirname, '..', 'dist'))); // Adjust path to the dist directory
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 if (require.main === module) {
   app.listen(8080, () => console.log('HOCR Map Server running on port 8080'));
