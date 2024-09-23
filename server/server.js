@@ -3,11 +3,111 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const db = require('./db'); // Import the knex instance
+const session = require('express-session');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const bcrypt = require('bcryptjs');
 
 const app = express();
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+
+// Session setup
+app.use(session({
+  secret: '1869mgrinberglaunchesrivercontrol1909',
+  resave: false,
+  saveUninitialized: true,
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Passport local strategy for login
+passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
+  try {
+    // Find user by email
+    const user = await db('users').where({ email }).first();
+
+    if (!user) {
+      return done(null, false, { message: 'Incorrect username.' });
+    }
+
+    // Check if password matches
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log('Hi there', isMatch);
+
+    if (!isMatch) {
+      return done(null, false, { message: 'Incorrect password.' });
+    }
+
+    // If credentials are valid, return the user
+    return done(null, user);
+  } catch (error) {
+    return done(error);
+  }
+}));
+
+// Serialize user into the session
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+// Deserialize user from the session
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await db('users').where({ id }).first();
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+});
+
+// Auth Routes
+// Register route
+app.post('/register', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await db('users').insert({
+      email,
+      password: hashedPassword
+    });
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (err) {
+    console.error('Error registering user:', err);
+    res.status(500).json({ error: 'Failed to register user'});
+  }
+});
+
+app.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      return res.status(500).json({ error: 'An error occurred during authentication' });
+    }
+    if (!user) {
+      return res.status(401).json({ error: info.message || 'Invalid credentials' });
+    }
+    // Log the user in
+    req.logIn(user, (loginErr) => {
+      if (loginErr) {
+        return res.status(500).json({ error: 'Login failed' });
+      }
+      return res.json({ message: 'Logged in successfully' });
+    });
+  })(req, res, next);
+});
+
+// Logout route
+app.post('/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) return res.status(500).json({ error: 'Failed to logout' });
+    res.json({ message: 'Logged out successfully' });
+  });
+});
+
+// API routes (boat-related routes unchanged)
 
 // API routes
 app.get('/api/boats', async (req, res) => {
@@ -27,7 +127,7 @@ app.get('/api/boats_view/:view', async (req, res) => {
   const { view } = req.params;
   const boatsView = await db('boats_view')
     .join('boats', 'boats_view.boat_id', '=', 'boats.id')
-    .select('boats_view.id', 'boats_view.lat', 'boats_view.lon', 'boats_view.boat_id', 'boats.name', 'boats.category')
+    .select('boats_view.id', 'boats_view.lat', 'boats_view.lon', 'boats_view.boat_id', 'boats.name', 'boats.category', 'boats_view.rotation')
     .where({ view_name: view });
   res.json(boatsView);
 });
@@ -37,12 +137,12 @@ app.post('/api/boats_view/insert', async (req, res) => {
 
   try {
     const existingBoat = await db('boats_view')
-      .where({ boat_id, view_name: view })
+      .where({ id: boat_id, view_name: view })
       .first();
 
     if (existingBoat) {
       await db('boats_view')
-        .where({ boat_id, view_name: view })
+        .where({ id: boat_id, view_name: view })
         .update({ lat, lon, rotation });
 
       res.status(200).send('Boat position updated');
@@ -85,12 +185,15 @@ app.delete('/api/boats_view/:id', async (req, res) => {
   }
 });
 
+
+// Static file serving for production
 app.use(express.static(path.join(__dirname, '..', 'dist'))); // Adjust path to the dist directory
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
+// Start the server
 if (require.main === module) {
   app.listen(8080, () => console.log('HOCR Map Server running on port 8080'));
 }

@@ -13,6 +13,8 @@ import { Modify } from 'ol/interaction';
 import axios from 'axios';
 import './App.css'; // Import the CSS file
 import { Modal, Button, Select, MenuItem } from '@mui/material';
+import ToolbarWithModal from './components/ToolbarWithModal';
+
 
 function App() {
   const [boats, setBoats] = useState([]);
@@ -226,6 +228,7 @@ function App() {
   };
 
   return (
+    <div><ToolbarWithModal />
     <div>
       <div ref={mapElementRef} style={{ width: '100%', height: '80vh' }}></div>
       <div className="boat-toolbar">
@@ -264,6 +267,7 @@ function App() {
           <Button onClick={() => setOpen(false)}>Close</Button>
         </div>
       </Modal>
+    </div>
     </div>
   );
 }
