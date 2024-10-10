@@ -9,8 +9,11 @@ import { fromLonLat, toLonLat } from 'ol/proj'; // Ensure this line is present
 import { Modify } from 'ol/interaction';
 import axios from 'axios';
 import BoatFeature from './BoatFeature'; // Make sure to import BoatFeature
+import { Style, Icon } from 'ol/style';
+import { Point } from 'ol/geom';
+import Feature from 'ol/Feature';
 
-const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef }) => {
+const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthenticated, isEditor }) => {
   const mapElementRef = useRef(null);
 
   // Initialize the map
@@ -32,35 +35,79 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef }) => {
     vectorSourceRef.current.map = olMap; // Store map reference in vectorSourceRef
     mapRef.current = olMap; // Set the map reference here
 
+    // Create a Modify interaction, but only enable it if the user is authenticated and an editor
     const modify = new Modify({ source: vectorSourceRef.current });
-    olMap.addInteraction(modify);
+    if (isAuthenticated && isEditor) {
+      olMap.addInteraction(modify);
 
-    modify.on('modifyend', (e) => {
-      e.features.forEach((feature) => {
-        const geometry = feature.getGeometry();
-        const [lon, lat] = toLonLat(geometry.getCoordinates());
-        const boatId = feature.get('id');
-        const rotation = feature.get('rotation') || 0;
+      modify.on('modifyend', (e) => {
+        e.features.forEach((feature) => {
+          const geometry = feature.getGeometry();
+          const [lon, lat] = toLonLat(geometry.getCoordinates());
+          const boatId = feature.get('id');
+          const rotation = feature.get('rotation') || 0;
 
-        axios.post('/api/boats_view/insert', {
-          boat_id: boatId,
-          lat,
-          lon,
-          rotation,
-          view: 'Parking',
-        })
-        .then((response) => {
-          console.log('Boat position and rotation updated:', response);
-        })
-        .catch((error) => {
-          console.error('Error updating boat position and rotation:', error);
+          axios.post('/api/boats_view/insert', {
+            boat_id: boatId,
+            lat,
+            lon,
+            rotation,
+            view: 'Parking',
+          })
+          .then((response) => {
+            console.log('Boat position and rotation updated:', response);
+          })
+          .catch((error) => {
+            console.error('Error updating boat position and rotation:', error);
+          });
         });
       });
+    }
+
+    // Add click event to handle Shift key rotation
+    olMap.on('click', (event) => {
+      if (event.originalEvent.shiftKey) {
+        const clickedFeature = olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+
+        if (clickedFeature) {
+          const currentStyle = clickedFeature.getStyle();
+          const currentRotation = clickedFeature.get('rotation') || 0;
+          const newRotation = currentRotation + (20 * Math.PI / 180); // Rotate 20 degrees
+
+          clickedFeature.set('rotation', newRotation);
+
+          // Update the style with the new rotation
+          clickedFeature.setStyle(
+            new Style({
+              image: new Icon({
+                src: currentStyle.getImage().getSrc(),
+                scale: currentStyle.getImage().getScale(),
+                rotation: newRotation,
+              }),
+            })
+          );
+
+          olMap.render();
+
+          const [lon, lat] = toLonLat(clickedFeature.getGeometry().getCoordinates());
+          axios.post('/api/boats_view/insert', {
+            boat_id: clickedFeature.get('id'),
+            lat,
+            lon,
+            rotation: newRotation,
+            view: 'Parking',
+          }).then((response) => {
+            console.log('Boat rotation updated:', response);
+          }).catch((error) => {
+            console.error('Error updating boat rotation:', error);
+          });
+        }
+      }
     });
 
     // Cleanup on unmount
     return () => olMap.setTarget(undefined);
-  }, [vectorSourceRef]);
+  }, [vectorSourceRef, isAuthenticated, isEditor]);
 
   // Fetch and update boat data
   useEffect(() => {

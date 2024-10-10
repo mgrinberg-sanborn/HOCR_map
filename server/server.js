@@ -12,7 +12,13 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+// CORS configuration
+const corsOptions = {
+  origin: 'http://localhost:5173', // your React app's origin
+  credentials: true, // allow credentials to be included
+};
+
+app.use(cors(corsOptions));
 
 // Session setup
 app.use(session({
@@ -36,7 +42,6 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, passwor
 
     // Check if password matches
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log('Hi there', isMatch);
 
     if (!isMatch) {
       return done(null, false, { message: 'Incorrect password.' });
@@ -94,7 +99,9 @@ app.post('/login', (req, res, next) => {
       if (loginErr) {
         return res.status(500).json({ error: 'Login failed' });
       }
-      return res.json({ message: 'Logged in successfully' });
+      req.session.isAuthenticated = true;
+      req.session.isEditor = true; // or false based on your logic
+      return res.json({ message: 'Logged in successfully', editor: user.editor });
     });
   })(req, res, next);
 });
@@ -103,8 +110,16 @@ app.post('/login', (req, res, next) => {
 app.post('/logout', (req, res) => {
   req.logout((err) => {
     if (err) return res.status(500).json({ error: 'Failed to logout' });
+    res.clearCookie('connect.sid'); // Clear the session cookie
     res.json({ message: 'Logged out successfully' });
   });
+});
+
+app.get('/api/check-auth', (req, res) => {
+  if (req.session.isAuthenticated) {
+    return res.json({ isAuthenticated: true, isEditor: req.session.isEditor });
+  }
+  return res.json({ isAuthenticated: false, isEditor: false });
 });
 
 // API routes (boat-related routes unchanged)

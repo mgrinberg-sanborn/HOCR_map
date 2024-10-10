@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import VectorSource from 'ol/source/Vector';
-import { fromLonLat, toLonLat } from 'ol/proj'; // Import fromLonLat here
+import { fromLonLat, toLonLat } from 'ol/proj';
 import axios from 'axios';
 import MapComponent from './components/MapComponent';
 import BoatToolbar from './components/BoatToolbar';
@@ -16,9 +16,13 @@ function App() {
   const [selectedBoat, setSelectedBoat] = useState('');
   const [open, setOpen] = useState(false);
   const [draggableBoats, setDraggableBoats] = useState([]);
+  const [isEditor, setIsEditor] = useState(false); // New state for editor check
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // New state for authentication
   const vectorSourceRef = useRef(new VectorSource());
   const mapRef = useRef(); // Create the mapRef here
 
+  
+  // Fetch boats on component mount
   useEffect(() => {
     axios.get('/api/boats').then((response) => setBoats(response.data));
   }, []);
@@ -29,7 +33,7 @@ function App() {
   }, [boats, mapBoats]);
 
   const handleBoatDrop = (e, boatId, boatName, category) => {
-    const map = mapRef.current; // Use mapRef here
+    const map = mapRef.current;
 
     // Check if map is initialized and the event is defined
     if (!map || !e) {
@@ -45,19 +49,16 @@ function App() {
 
     // Get the coordinates from the pixel
     const coords = map.getCoordinateFromPixel(pixel);
-    console.log('Coordinates from pixel:', coords); // Log the raw coordinates
+    console.log('Coordinates from pixel:', coords);
 
-    // Ensure coords is not null or undefined
     if (!coords) {
       console.error('Could not get coordinates from pixel.');
       return;
     }
 
-    // Transform the coordinates from map projection to lon/lat
     const lonLat = toLonLat(coords);
-    console.log('Converted Lon/Lat:', lonLat); // Log the converted coordinates
+    console.log('Converted Lon/Lat:', lonLat);
 
-    // Ensure the lonLat is valid
     if (!lonLat || lonLat.length < 2) {
       console.error('Could not convert coordinates to lon/lat:', coords);
       return;
@@ -69,13 +70,11 @@ function App() {
 
     axios.post('/api/boats_view/insert', {
       boat_id: boatId,
-      lat: lonLat[1], // Use lat from lonLat
-      lon: lonLat[0], // Use lon from lonLat
+      lat: lonLat[1],
+      lon: lonLat[0],
       view: 'Parking',
     }).then((response) => {
       console.log('Boat position updated', response);
-
-      // Update boats and mapBoats after adding a new boat
       setBoats(prevBoats => prevBoats.filter(boat => boat.id !== boatId));
       setMapBoats(prevBoats => [...prevBoats, { id: boatId, name: boatName, lat: lonLat[1], lon: lonLat[0], category }]);
     }).catch((error) => {
@@ -107,21 +106,33 @@ function App() {
         .catch((error) => {
           console.error('Error deleting boat:', error);
         });
-    }  };
+    }
+  };
 
   return (
     <div>
-      <ToolbarWithModal />
+      <ToolbarWithModal 
+        isAuthenticated={isAuthenticated} 
+        setIsAuthenticated={setIsAuthenticated} 
+        isEditor={isEditor} 
+        setIsEditor={setIsEditor}
+      />
       <MapComponent 
         mapBoats={mapBoats} 
         setMapBoats={setMapBoats} 
         vectorSourceRef={vectorSourceRef} 
-        mapRef={mapRef} // Pass mapRef to MapComponent
+        mapRef={mapRef} 
+        isAuthenticated={isAuthenticated}  // Pass isAuthenticated
+        isEditor={isEditor}    
       />
-      <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} />
-      <Button variant="outlined" onClick={() => setOpen(true)}>
-  Open Delete Boat Modal
-</Button>
+      {isAuthenticated && isEditor && (
+        <>
+          <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} />
+          <Button variant="outlined" onClick={() => setOpen(true)}>
+            Open Delete Boat Modal
+          </Button>
+        </>
+      )}
       <DeleteBoatModal
         open={open}
         setOpen={setOpen}
