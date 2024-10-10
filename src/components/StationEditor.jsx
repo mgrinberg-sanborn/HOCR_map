@@ -23,7 +23,7 @@ const StationEditor = () => {
 
   useEffect(() => {
     const fetchBoats = async () => {
-      const response = await fetch('http://localhost:8080/api/boats'); // Adjust the endpoint accordingly
+      const response = await fetch('/api/boats'); // Adjust the endpoint accordingly
       const data = await response.json();
       setBoats(data);
     };
@@ -39,7 +39,7 @@ const StationEditor = () => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/boats', {
+      const response = await fetch('/api/boats', {
         method: 'PUT', // Use the appropriate method for updating
         headers: {
           'Content-Type': 'application/json',

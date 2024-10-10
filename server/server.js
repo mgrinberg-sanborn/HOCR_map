@@ -71,7 +71,7 @@ passport.deserializeUser(async (id, done) => {
 
 // Auth Routes
 // Register route
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
   const { email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -86,7 +86,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.post('/login', (req, res, next) => {
+app.post('/api/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) {
       return res.status(500).json({ error: 'An error occurred during authentication' });
@@ -107,7 +107,7 @@ app.post('/login', (req, res, next) => {
 });
 
 // Logout route
-app.post('/logout', (req, res) => {
+app.post('/api/logout', (req, res) => {
   req.logout((err) => {
     if (err) return res.status(500).json({ error: 'Failed to logout' });
     res.clearCookie('connect.sid'); // Clear the session cookie

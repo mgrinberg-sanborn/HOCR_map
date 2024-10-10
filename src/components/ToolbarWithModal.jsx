@@ -16,7 +16,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
   // Check authentication state from the server on component mount
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const response = await fetch('http://localhost:8080/api/check-auth', {
+      const response = await fetch('/api/check-auth', {
         credentials: 'include',
       });
       const data = await response.json();
@@ -55,7 +55,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
   const handleSubmit = async () => {
     try {
       const endpoint = activeTab === 0 ? 'login' : 'register';
-      const response = await fetch(`http://localhost:8080/${endpoint}`, {
+      const response = await fetch(`/api/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
   };
 
   const handleLogout = async () => {
-    await fetch('http://localhost:8080/logout', {
+    await fetch('/api/logout', {
       method: 'POST',
       credentials: 'include', // Include credentials (session cookies)
     });
