@@ -1,18 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
-import VectorLayer from 'ol/layer/Vector';
+import React, { useState, useEffect, useRef } from 'react';
 import VectorSource from 'ol/source/Vector';
-import Feature from 'ol/Feature';
-import Point from 'ol/geom/Point';
 import { fromLonLat, toLonLat } from 'ol/proj';
-import { Style, Icon } from 'ol/style';
-import { Modify } from 'ol/interaction';
 import axios from 'axios';
+import MapComponent from './components/MapComponent';
+import BoatToolbar from './components/BoatToolbar';
+import DeleteBoatModal from './components/DeleteBoatModal';
+import BoatFeature from './components/BoatFeature';
+import ToolbarWithModal from './components/ToolbarWithModal';
+import { Button } from '@mui/material';
 import './App.css'; // Import the CSS file
-import { Modal, Button, Select, MenuItem } from '@mui/material';
 
 function App() {
   const [boats, setBoats] = useState([]);
@@ -20,157 +16,70 @@ function App() {
   const [selectedBoat, setSelectedBoat] = useState('');
   const [open, setOpen] = useState(false);
   const [draggableBoats, setDraggableBoats] = useState([]);
-
-  const mapRef = useRef(null);
-  const mapElementRef = useRef(null);
+  const [isEditor, setIsEditor] = useState(false); // New state for editor check
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // New state for authentication
   const vectorSourceRef = useRef(new VectorSource());
+  const mapRef = useRef(); // Create the mapRef here
 
+  
+  // Fetch boats on component mount
   useEffect(() => {
-    axios.get('/api/boats').then((response) => {
-      setBoats(response.data);
-    });
+    axios.get('/api/boats').then((response) => setBoats(response.data));
   }, []);
 
   useEffect(() => {
-    axios.get('/api/boats_view/Parking').then((response) => {
-      const boatData = response.data;
-      setMapBoats(boatData);
-
-      const features = boatData.map(createBoatFeature);
-      vectorSourceRef.current.clear(); // Clear existing features before adding new ones
-      vectorSourceRef.current.addFeatures(features);
-      mapRef.current.render();
-    });
-
-    if (!mapRef.current) {
-      const olMap = new Map({
-        target: mapElementRef.current,
-        layers: [
-          new TileLayer({ source: new OSM() }),
-          new VectorLayer({ source: vectorSourceRef.current }),
-        ],
-        view: new View({
-          center: fromLonLat([-71.0969, 42.3553]),
-          zoom: 20,
-          maxZoom: 20,
-          minZoom: 20,
-        }),
-      });
-
-      mapRef.current = olMap;
-
-      const modify = new Modify({ source: vectorSourceRef.current });
-      mapRef.current.addInteraction(modify);
-
-      modify.on('modifyend', (e) => {
-        e.features.forEach((feature) => {
-          const geometry = feature.getGeometry();
-          const [lon, lat] = toLonLat(geometry.getCoordinates());
-          const boatId = feature.get('id');
-          const rotation = feature.get('rotation') || 0;
-
-          axios.post('/api/boats_view/insert', {
-            boat_id: boatId,
-            lat,
-            lon,
-            rotation,
-            view: 'Parking',
-          }).then((response) => {
-            console.log('Boat position and rotation updated:', response);
-          }).catch((error) => {
-            console.error('Error updating boat position and rotation:', error);
-          });
-        });
-      });
-
-      mapRef.current.on('click', (event) => {
-        if (event.originalEvent.shiftKey) {
-          const clickedFeature = mapRef.current.forEachFeatureAtPixel(event.pixel, (feature) => feature);
-
-          if (clickedFeature) {
-            const currentStyle = clickedFeature.getStyle();
-            const currentRotation = clickedFeature.get('rotation') || 0;
-            const newRotation = currentRotation + (20 * Math.PI / 180);
-
-            clickedFeature.set('rotation', newRotation);
-
-            clickedFeature.setStyle(
-              new Style({
-                image: new Icon({
-                  src: currentStyle.getImage().getSrc(),
-                  scale: currentStyle.getImage().getScale(),
-                  rotation: newRotation,
-                }),
-              })
-            );
-
-            mapRef.current.render();
-
-            const [lon, lat] = toLonLat(clickedFeature.getGeometry().getCoordinates());
-            axios.post('/api/boats_view/insert', {
-              boat_id: clickedFeature.get('id'),
-              lat,
-              lon,
-              rotation: newRotation,
-              view: 'Parking',
-            }).then((response) => {
-              console.log('Boat rotation updated:', response);
-            }).catch((error) => {
-              console.error('Error updating boat rotation:', error);
-            });
-          }
-        }
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    // Recalculate draggableBoats when boats or mapBoats change
-    const boatsOnMap = new Set(mapBoats.map(boat => boat.boat_id));
-    setDraggableBoats(boats.filter(boat => !boatsOnMap.has(boat.id)));
+    const boatsOnMap = new Set(mapBoats.map((boat) => boat.boat_id));
+    setDraggableBoats(boats.filter((boat) => !boatsOnMap.has(boat.id)));
   }, [boats, mapBoats]);
 
-  useEffect(() => {
-    // Update the dropdown options whenever mapBoats changes
-    if (open) {
-      axios.get('/api/boats_view/Parking').then((response) => {
-        setMapBoats(response.data);
-      });
+  const handleBoatDrop = (e, boatId, boatName, category) => {
+    const map = mapRef.current;
+
+    // Check if map is initialized and the event is defined
+    if (!map || !e) {
+      console.error('Map is not initialized or event is null.');
+      return;
     }
-  }, [open]);
 
-  const createBoatFeature = (boat) => {
-    const { lat, lon, name, id, rotation = 0, category } = boat;
-    const boatCoordinates = fromLonLat([lon, lat]);
+    const pixel = map.getEventPixel(e);
+    if (!pixel) {
+      console.error('Could not get pixel from event.');
+      return;
+    }
 
-    const boatFeature = new Feature({
-      geometry: new Point(boatCoordinates),
-      id,
-      rotation,
+    // Get the coordinates from the pixel
+    const coords = map.getCoordinateFromPixel(pixel);
+    console.log('Coordinates from pixel:', coords);
+
+    if (!coords) {
+      console.error('Could not get coordinates from pixel.');
+      return;
+    }
+
+    const lonLat = toLonLat(coords);
+    console.log('Converted Lon/Lat:', lonLat);
+
+    if (!lonLat || lonLat.length < 2) {
+      console.error('Could not convert coordinates to lon/lat:', coords);
+      return;
+    }
+
+    const boatFeature = BoatFeature({ lat: lonLat[1], lon: lonLat[0], name: boatName, id: boatId, category });
+    vectorSourceRef.current.addFeature(boatFeature);
+    map.updateSize();
+
+    axios.post('/api/boats_view/insert', {
+      boat_id: boatId,
+      lat: lonLat[1],
+      lon: lonLat[0],
+      view: 'Parking',
+    }).then((response) => {
+      console.log('Boat position updated', response);
+      setBoats(prevBoats => prevBoats.filter(boat => boat.id !== boatId));
+      setMapBoats(prevBoats => [...prevBoats, { id: boatId, name: boatName, lat: lonLat[1], lon: lonLat[0], category }]);
+    }).catch((error) => {
+      console.error('Error updating boat position', error);
     });
-
-    const fillColor = category === 'SL' ? 'red' : 'yellow';
-
-    const svgIcon = `
-      <svg width="50" height="20" xmlns="http://www.w3.org/2000/svg">
-        <rect x="10" width="35" height="20" fill="${fillColor}"/>
-        <polygon points="10,0 0,10 10,20" fill="${fillColor}"/>
-        <text x="25" y="14" font-size="12" fill="black" font-family="Arial" text-anchor="middle">${name}</text>
-      </svg>`;
-
-    const svgIconDataURL = `data:image/svg+xml;utf8,${encodeURIComponent(svgIcon)}`;
-
-    boatFeature.setStyle(
-      new Style({
-        image: new Icon({
-          src: svgIconDataURL,
-          scale: 1,
-          rotation,
-        }),
-      })
-    );
-
-    return boatFeature;
   };
 
   const handleDeleteBoat = () => {
@@ -200,70 +109,38 @@ function App() {
     }
   };
 
-  const handleBoatDrop = (e, boatId, boatName, category) => {
-    const map = mapRef.current;
-    const pixel = map.getEventPixel(e);
-    const coordinates = toLonLat(map.getCoordinateFromPixel(pixel));
-
-    const boatFeature = createBoatFeature({ lat: coordinates[1], lon: coordinates[0], name: boatName, id: boatId, category });
-    vectorSourceRef.current.addFeature(boatFeature);
-    map.updateSize();
-
-    axios.post('/api/boats_view/insert', {
-      boat_id: boatId,
-      lat: coordinates[1],
-      lon: coordinates[0],
-      view: 'Parking',
-    }).then((response) => {
-      console.log('Boat position updated', response);
-
-      // Update boats and mapBoats after adding a new boat
-      setBoats(prevBoats => prevBoats.filter(boat => boat.id !== boatId));
-      setMapBoats(prevBoats => [...prevBoats, { id: boatId, name: boatName, lat: coordinates[1], lon: coordinates[0], category }]);
-    }).catch((error) => {
-      console.error('Error updating boat position', error);
-    });
-  };
-
   return (
     <div>
-      <div ref={mapElementRef} style={{ width: '100%', height: '80vh' }}></div>
-      <div className="boat-toolbar">
-        <h3>Boats</h3>
-        <div className="boat-list">
-          {draggableBoats.map((boat) => (
-            <div
-              key={boat.id}
-              className="boat-item"
-              draggable
-              onDragEnd={(e) => handleBoatDrop(e, boat.id, boat.name, boat.category)}
-            >
-              <svg width="50" height="20" xmlns="http://www.w3.org/2000/svg">
-                <rect x="10" width="35" height="20" fill={boat.category === 'SL' ? 'red' : 'yellow'}/>
-                <polygon points="10,0 0,10 10,20" fill={boat.category === 'SL' ? 'red' : 'yellow'}/>
-                <text x="25" y="14" font-size="12" fill="black" font-family="Arial" text-anchor="middle">{boat.name}</text>
-              </svg>
-            </div>
-          ))}
-        </div>
-      </div>
-      <Button variant="contained" onClick={() => setOpen(true)}>Delete Boat</Button>
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <div className="modal-content">
-          <h2>Deleting a Boat (Refresh if deleting recently Added)</h2>
-          <Select
-            value={selectedBoat}
-            onChange={(e) => setSelectedBoat(e.target.value)}
-            fullWidth
-          >
-            {mapBoats.map((boat) => (
-              <MenuItem key={boat.id} value={boat.id}>{boat.name}</MenuItem>
-            ))}
-          </Select>
-          <Button onClick={handleDeleteBoat}>Delete Boat</Button>
-          <Button onClick={() => setOpen(false)}>Close</Button>
-        </div>
-      </Modal>
+      <ToolbarWithModal 
+        isAuthenticated={isAuthenticated} 
+        setIsAuthenticated={setIsAuthenticated} 
+        isEditor={isEditor} 
+        setIsEditor={setIsEditor}
+      />
+      <MapComponent 
+        mapBoats={mapBoats} 
+        setMapBoats={setMapBoats} 
+        vectorSourceRef={vectorSourceRef} 
+        mapRef={mapRef} 
+        isAuthenticated={isAuthenticated}  // Pass isAuthenticated
+        isEditor={isEditor}    
+      />
+      {isAuthenticated && isEditor && (
+        <>
+          <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} />
+          <Button variant="outlined" onClick={() => setOpen(true)}>
+            Open Delete Boat Modal
+          </Button>
+        </>
+      )}
+      <DeleteBoatModal
+        open={open}
+        setOpen={setOpen}
+        selectedBoat={selectedBoat}
+        setSelectedBoat={setSelectedBoat}
+        mapBoats={mapBoats}
+        handleDeleteBoat={handleDeleteBoat}
+      />
     </div>
   );
 }
