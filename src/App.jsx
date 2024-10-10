@@ -8,7 +8,7 @@ import DeleteBoatModal from './components/DeleteBoatModal';
 import BoatFeature from './components/BoatFeature';
 import ToolbarWithModal from './components/ToolbarWithModal';
 import { Button } from '@mui/material';
-import './App.css'; // Import the CSS file
+import './App.css';
 
 function App() {
   const [boats, setBoats] = useState([]);
@@ -16,21 +16,31 @@ function App() {
   const [selectedBoat, setSelectedBoat] = useState('');
   const [open, setOpen] = useState(false);
   const [draggableBoats, setDraggableBoats] = useState([]);
-  const [isEditor, setIsEditor] = useState(false); // New state for editor check
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // New state for authentication
+  const [isEditor, setIsEditor] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeView, setActiveView] = useState('Parking'); // Default view
   const vectorSourceRef = useRef(new VectorSource());
-  const mapRef = useRef(); // Create the mapRef here
+  const mapRef = useRef();
 
-  
   // Fetch boats on component mount
   useEffect(() => {
     axios.get('/api/boats').then((response) => setBoats(response.data));
   }, []);
 
+  // Update draggable boats based on active view
   useEffect(() => {
-    const boatsOnMap = new Set(mapBoats.map((boat) => boat.boat_id));
+    const boatsOnMap = new Set(mapBoats.map((boat) => boat.id));
     setDraggableBoats(boats.filter((boat) => !boatsOnMap.has(boat.id)));
   }, [boats, mapBoats]);
+
+  // Fetch boats for the active view when it changes
+  useEffect(() => {
+    axios.get(`/api/boats_view/${activeView}`).then((response) => {
+      const updatedBoatData = response.data;
+      setMapBoats(updatedBoatData);
+      
+    });
+  }, [activeView]);
 
   const handleBoatDrop = (e, boatId, boatName, category) => {
     const map = mapRef.current;
@@ -72,7 +82,7 @@ function App() {
       boat_id: boatId,
       lat: lonLat[1],
       lon: lonLat[0],
-      view: 'Parking',
+      view: activeView,
     }).then((response) => {
       console.log('Boat position updated', response);
       setBoats(prevBoats => prevBoats.filter(boat => boat.id !== boatId));
@@ -91,7 +101,7 @@ function App() {
         .then(() => {
           setMapBoats((prevBoats) => prevBoats.filter((boat) => boat.id !== selectedBoat));
 
-          axios.get('/api/boats_view/Parking').then((response) => {
+          axios.get(`/api/boats_view/${activeView}`).then((response) => {
             const updatedBoatData = response.data;
             setMapBoats(updatedBoatData);
 
@@ -109,6 +119,11 @@ function App() {
     }
   };
 
+  const openDeleteModal = () => {
+    setOpen(true);
+    setSelectedBoat('');
+  };
+
   return (
     <div>
       <ToolbarWithModal 
@@ -116,19 +131,23 @@ function App() {
         setIsAuthenticated={setIsAuthenticated} 
         isEditor={isEditor} 
         setIsEditor={setIsEditor}
+        activeView={activeView}
+        setActiveView={setActiveView}
       />
       <MapComponent 
         mapBoats={mapBoats} 
         setMapBoats={setMapBoats} 
         vectorSourceRef={vectorSourceRef} 
         mapRef={mapRef} 
-        isAuthenticated={isAuthenticated}  // Pass isAuthenticated
+        isAuthenticated={isAuthenticated}  
         isEditor={isEditor}    
+        activeView={activeView}
+        setActiveView={setActiveView}
       />
       {isAuthenticated && isEditor && (
         <>
           <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} />
-          <Button variant="outlined" onClick={() => setOpen(true)}>
+          <Button variant="outlined" onClick={openDeleteModal}>
             Open Delete Boat Modal
           </Button>
         </>
@@ -138,7 +157,7 @@ function App() {
         setOpen={setOpen}
         selectedBoat={selectedBoat}
         setSelectedBoat={setSelectedBoat}
-        mapBoats={mapBoats}
+        mapBoats={mapBoats} // Use filtered boats for the active view
         handleDeleteBoat={handleDeleteBoat}
       />
     </div>

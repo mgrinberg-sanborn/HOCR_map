@@ -5,18 +5,41 @@ import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
-import { fromLonLat, toLonLat } from 'ol/proj'; // Ensure this line is present
+import { fromLonLat, toLonLat } from 'ol/proj';
 import { Modify } from 'ol/interaction';
+import { Control } from 'ol/control'; // Import Control for custom controls
 import axios from 'axios';
-import BoatFeature from './BoatFeature'; // Make sure to import BoatFeature
+import BoatFeature from './BoatFeature';
 import { Style, Icon } from 'ol/style';
 import { Point } from 'ol/geom';
 import Feature from 'ol/Feature';
+import '../MapComponent.css'; // Import a CSS file for styles
 
-const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthenticated, isEditor }) => {
+const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthenticated, isEditor, activeView }) => {
   const mapElementRef = useRef(null);
+  const olMapRef = useRef(null); // Store the OpenLayers map instance
 
-  // Initialize the map
+  const viewConfigurations = {
+    Parking: {
+      center: fromLonLat([-71.0969, 42.3553]),
+      zoom: 20,
+      maxZoom: 20,
+      minZoom: 20,
+    },
+    Friday: {
+      center: fromLonLat([-71.0969, 42.3553]),
+      zoom: 15,
+      maxZoom: 20,
+      minZoom: 15,
+    },
+    SaturdaySunday: {
+      center: fromLonLat([-71.1200, 42.3625]),
+      zoom: 15,
+      maxZoom: 20,
+      minZoom: 15,
+    },
+  };
+
   useEffect(() => {
     const olMap = new Map({
       target: mapElementRef.current,
@@ -24,18 +47,23 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
         new TileLayer({ source: new OSM() }),
         new VectorLayer({ source: vectorSourceRef.current }),
       ],
-      view: new View({
-        center: fromLonLat([-71.0969, 42.3553]), // Correct usage of fromLonLat
-        zoom: 20,
-        maxZoom: 20,
-        minZoom: 20,
-      }),
+      view: new View(viewConfigurations[activeView]),
     });
 
-    vectorSourceRef.current.map = olMap; // Store map reference in vectorSourceRef
-    mapRef.current = olMap; // Set the map reference here
+    vectorSourceRef.current.map = olMap; 
+    mapRef.current = olMap; 
+    olMapRef.current = olMap; // Store the map instance in the ref
 
-    // Create a Modify interaction, but only enable it if the user is authenticated and an editor
+    // Create a home button control
+    const homeButton = document.createElement('button');
+    homeButton.className = 'home-button'; // Add a class for styling
+    homeButton.innerHTML = '🏠'; // Use an emoji for the home icon
+
+    homeButton.addEventListener('click', resetMapView); // Attach the click event
+
+    // Create a control for the button and add it to the map
+    olMap.addControl(new Control({ element: homeButton }));
+
     const modify = new Modify({ source: vectorSourceRef.current });
     if (isAuthenticated && isEditor) {
       olMap.addInteraction(modify);
@@ -52,7 +80,7 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
             lat,
             lon,
             rotation,
-            view: 'Parking',
+            view: activeView,
           })
           .then((response) => {
             console.log('Boat position and rotation updated:', response);
@@ -64,7 +92,6 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
       });
     }
 
-    // Add click event to handle Shift key rotation
     olMap.on('click', (event) => {
       if (event.originalEvent.shiftKey) {
         const clickedFeature = olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
@@ -72,11 +99,9 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
         if (clickedFeature) {
           const currentStyle = clickedFeature.getStyle();
           const currentRotation = clickedFeature.get('rotation') || 0;
-          const newRotation = currentRotation + (20 * Math.PI / 180); // Rotate 20 degrees
+          const newRotation = currentRotation + (20 * Math.PI / 180); 
 
           clickedFeature.set('rotation', newRotation);
-
-          // Update the style with the new rotation
           clickedFeature.setStyle(
             new Style({
               image: new Icon({
@@ -95,7 +120,7 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
             lat,
             lon,
             rotation: newRotation,
-            view: 'Parking',
+            view: activeView,
           }).then((response) => {
             console.log('Boat rotation updated:', response);
           }).catch((error) => {
@@ -105,47 +130,55 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
       }
     });
 
-    // Cleanup on unmount
     return () => olMap.setTarget(undefined);
-  }, [vectorSourceRef, isAuthenticated, isEditor]);
+  }, [vectorSourceRef, isAuthenticated, isEditor, activeView]); 
 
-  // Fetch and update boat data
   useEffect(() => {
-    axios.get('/api/boats_view/Parking')
+    // Fetch and update boat data whenever activeView changes
+    axios.get(`/api/boats_view/${activeView}`)
       .then((response) => {
         const boatData = response.data;
 
-        // Log API response for debugging
-        console.log('API boat data response:', boatData);
-
         if (!boatData || boatData.length === 0) {
           console.error('No boat data received from API or API returned empty data.');
+          vectorSourceRef.current.clear(); // Clear existing features
           return;
         }
 
         setMapBoats(boatData);
 
+        // Clear existing features before adding new ones
+        vectorSourceRef.current.clear(); 
+
         const features = boatData.map(boat => {
-          const feature = BoatFeature(boat); // Call BoatFeature directly
+          const feature = BoatFeature(boat); 
           if (!feature) {
             console.error('Invalid boat feature for:', boat);
           }
           return feature;
-        }).filter(Boolean); // Ensure only valid features are added
+        }).filter(Boolean);
 
-        vectorSourceRef.current.clear();
         vectorSourceRef.current.addFeatures(features);
 
         if (vectorSourceRef.current.map) {
-          vectorSourceRef.current.map.render(); // Render map only if it's initialized
+          vectorSourceRef.current.map.render(); 
         }
       })
       .catch((error) => {
         console.error('Error fetching boat data:', error);
       });
-  }, [setMapBoats, vectorSourceRef]); // Include vectorSourceRef as a dependency
+  }, [setMapBoats, vectorSourceRef, activeView]); // Include activeView to refetch on change
 
-  return <div ref={mapElementRef} style={{ width: '100%', height: '80vh' }}></div>;
+  // Function to reset the map view to the default extent
+  const resetMapView = () => {
+    const viewConfig = viewConfigurations[activeView];
+    olMapRef.current.getView().setCenter(viewConfig.center);
+    olMapRef.current.getView().setZoom(viewConfig.zoom);
+  };
+
+  return (
+    <div ref={mapElementRef} style={{ width: '100%', height: '80vh' }}></div>
+  );
 };
 
 export default MapComponent;

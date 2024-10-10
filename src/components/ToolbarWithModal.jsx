@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Button, Modal, Box, Typography, TextField, Tabs, Tab, Snackbar, Alert } from '@mui/material';
 
-const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIsEditor }) => {
+const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIsEditor, setActiveView }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0); // 0 = Login, 1 = Register
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
   useEffect(() => {
     const checkAuthStatus = async () => {
       const response = await fetch('http://localhost:8080/api/check-auth', {
-        credentials: 'include', // Include cookies in the request
+        credentials: 'include',
       });
       const data = await response.json();
       setIsAuthenticated(data.isAuthenticated);
@@ -23,7 +23,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
 
     checkAuthStatus();
   }, []);
-  
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
@@ -33,7 +33,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
     setFormData({
       email: '',
       password: '',
-    }); // Clear the form when switching tabs
+    });
   };
 
   const handleInputChange = (e) => {
@@ -58,10 +58,10 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: formData.email.toLowerCase(), // Convert email to lowercase
+          email: formData.email.toLowerCase(),
           password: formData.password,
         }),
-        credentials: 'include', // Include credentials (session cookies)
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -78,13 +78,13 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
 
       // Update authentication state
       setIsAuthenticated(true);
-      setIsEditor(data.editor || false); // Pass editor status if available
+      setIsEditor(data.editor || false);
 
       handleClose(); // Close modal on success
     } catch (error) {
       setSnackbar({
         open: true,
-        message: error.message || 'Error during submit',
+        message: error.message || 'Error occurred',
         severity: 'error',
       });
     }
@@ -99,13 +99,24 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
     setIsEditor(false);
   };
 
+  const handleViewChange = (view) => {
+    setActiveView(view);
+  };
+
   return (
-    <>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Boat Management App
-          </Typography>
+    <AppBar position="static">
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        <div>
+          <Button color="inherit" onClick={() => handleViewChange('Parking')}>Parking View</Button>
+          {/* <Button color="inherit" onClick={() => handleViewChange('Friday')}>Friday View</Button> */}
+          <Button color="inherit" onClick={() => handleViewChange('SaturdaySunday')}>Saturday/Sunday View</Button>
+          {isAuthenticated && (
+            <Button color="inherit" onClick={() => handleViewChange('StationEditor')}>
+              Station Editor
+            </Button>
+          )}
+        </div>
+        <div>
           {isAuthenticated ? (
             <Button color="inherit" onClick={handleLogout}>
               Logout
@@ -115,37 +126,40 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
               Login/Register
             </Button>
           )}
-        </Toolbar>
-      </AppBar>
+        </div>
+      </Toolbar>
 
       <Modal open={open} onClose={handleClose}>
-        <Box sx={{ p: 4, bgcolor: 'background.paper', margin: 'auto', width: 300, borderRadius: 2 }}>
-          <Tabs value={activeTab} onChange={handleTabChange}>
+        <Box sx={{ width: 400, padding: 2, margin: 'auto', mt: 8, bgcolor: 'white', borderRadius: 1 }}>
+          <Typography variant="h6" component="h2">
+            {activeTab === 0 ? 'Login' : 'Register'}
+          </Typography>
+          <Tabs value={activeTab} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
             <Tab label="Login" />
             <Tab label="Register" />
           </Tabs>
-          <Typography variant="h6" component="h2" sx={{ mt: 2 }}>
-            {activeTab === 0 ? 'Login' : 'Register'}
-          </Typography>
           <TextField
-            label="Email"
             name="email"
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             value={formData.email}
             onChange={handleInputChange}
-            fullWidth
-            margin="normal"
+            onKeyDown={handleKeyDown}
           />
           <TextField
+            name="password"
             label="Password"
             type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown} // Add key down event
+            variant="outlined"
             fullWidth
             margin="normal"
+            value={formData.password}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
           />
-          <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2 }}>
+          <Button variant="contained" onClick={handleSubmit} fullWidth>
             {activeTab === 0 ? 'Login' : 'Register'}
           </Button>
         </Box>
@@ -156,7 +170,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </>
+    </AppBar>
   );
 };
 

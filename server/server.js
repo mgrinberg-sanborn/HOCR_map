@@ -180,13 +180,14 @@ app.post('/api/boats_view/insert', async (req, res) => {
 
 
 // Delete a boat from the view
-app.delete('/api/boats_view/:id', async (req, res) => {
-  const { id } = req.params;
+app.delete('/api/boats_view/:view/:id', async (req, res) => {
+  const { view, id } = req.params;
 
   try {
     // Delete the boat from the boats_view table based on the boat_id
     const deletedRows = await db('boats_view')
       .where({ id })
+      .andWhere({ view_name: view }) // Filter by active view
       .del();
 
     if (deletedRows) {

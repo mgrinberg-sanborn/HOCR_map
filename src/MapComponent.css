@@ -1,0 +1,19 @@
+.home-button {
+    background-color: white;
+    border: 2px solid #007bff; /* Customize button border color */
+    border-radius: 50%; /* Make it circular */
+    width: 40px; /* Width of the button */
+    height: 40px; /* Height of the button */
+    cursor: pointer; /* Change cursor on hover */
+    position: absolute; /* Position it on the map */
+    top: 20px; /* Distance from the top */
+    right: 20px; /* Distance from the right */
+    z-index: 1000; /* Ensure it is on top of other elements */
+    font-size: 24px; /* Size of the icon */
+  }
+  
+  .home-button:hover {
+    background-color: #007bff; /* Change background color on hover */
+    color: white; /* Change icon color on hover */
+  }
+  
