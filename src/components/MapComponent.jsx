@@ -32,13 +32,13 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
     Friday: {
       center: fromLonLat([-71.0969, 42.3553]),
       zoom: 15,
-      maxZoom: 20,
+      maxZoom: 18,
       minZoom: 15,
     },
     SaturdaySunday: {
       center: fromLonLat([-71.1200, 42.3625]),
       zoom: 15,
-      maxZoom: 20,
+      maxZoom: 17,
       minZoom: 15,
     },
   };
@@ -75,14 +75,15 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
         e.features.forEach((feature) => {
           const geometry = feature.getGeometry();
           const [lon, lat] = toLonLat(geometry.getCoordinates());
-          const boatId = feature.get('id');
+          const boatId = feature.get('boat_id');
+          const viewID = feature.get('viewID');
           const rotation = feature.get('rotation') || 0;
-
           axios.post('/api/boats_view/insert', {
             boat_id: boatId,
             lat,
             lon,
             rotation,
+            viewID: viewID,
             view: activeView,
           })
           .then((response) => {
@@ -118,8 +119,9 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
           olMap.render();
 
           const [lon, lat] = toLonLat(clickedFeature.getGeometry().getCoordinates());
+          console.log('boat', clickedFeature.get('boat_id'), 'rotated to', newRotation);
           axios.post('/api/boats_view/insert', {
-            boat_id: clickedFeature.get('id'),
+            boat_id: clickedFeature.get('boat_id'),
             lat,
             lon,
             rotation: newRotation,

@@ -10,14 +10,14 @@ const BoatFeature = (boat) => { // Change to take boat directly
     return null;
   }
 
-  console.log('Boat data:', boat);
-
-  const { lat, lon, name, viewID, rotation = 0, category, WaterorLand, Zone, Position, assignment, motor_position, at_ready_position, nearest_biobreak_location } = boat;
+console.log('Mark', boat);
+  const { lat, lon, boat_id, name, viewID, rotation = 0, category, WaterorLand, Zone, Position, assignment, motor_position, at_ready_position, nearest_biobreak_location } = boat;
 
   const boatCoordinates = fromLonLat([lon, lat]);
 
   const boatFeature = new Feature({
     geometry: new Point(boatCoordinates),
+    boat_id,
     viewID,
     rotation,
     WaterorLand,

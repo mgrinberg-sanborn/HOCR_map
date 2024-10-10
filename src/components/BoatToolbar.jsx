@@ -8,7 +8,7 @@ const BoatToolbar = ({ draggableBoats, handleBoatDrop, activeView }) => {
         {draggableBoats
           .filter((boat) => {
             // If activeView is 'parking', show only boats where WaterorLand = 'Water'
-            return activeView === 'parking' ? boat.WaterorLand === 'Water' : true;
+            return activeView === 'Parking' ? boat.WaterorLand === 'Water' : true;
           })
           .map((boat) => {
             // Determine the fill color based on category
@@ -34,7 +34,6 @@ const BoatToolbar = ({ draggableBoats, handleBoatDrop, activeView }) => {
             }
 
             const svgIconDataURL = `data:image/svg+xml;utf8,${encodeURIComponent(svgIcon)}`;
-
             return (
               <div
                 key={boat.id}

@@ -64,7 +64,7 @@ function App() {
     const boatFeature = BoatFeature({ lat: lonLat[1], lon: lonLat[0], name: boatName, id: boatId, category });
     vectorSourceRef.current.addFeature(boatFeature);
     map.updateSize();
-
+    console.log('Test', boatId, boatName, lonLat, activeView);
     axios.post('/api/boats_view/insert', {
       boat_id: boatId,
       lat: lonLat[1],
@@ -138,8 +138,7 @@ function App() {
                 <>
                   <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} activeView={activeView} setActiveView={setActiveView} />
                   <Button variant="outlined" onClick={openDeleteModal}>
-                    Open Delete Boat Modal
-                  </Button>
+Delete a Boat                  </Button>
                 </>
               )}
               <DeleteBoatModal

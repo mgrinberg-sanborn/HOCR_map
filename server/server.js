@@ -218,16 +218,16 @@ app.get('/api/boats_view/:view/:name', async (req, res) => {
 });
 
 app.post('/api/boats_view/insert', async (req, res) => {
-  const { boat_id, lat, lon, view, rotation } = req.body;
-
+  const { boat_id, lat, lon, view, rotation, viewID } = req.body;
+  console.log(req.body);
   try {
     const existingBoat = await db('boats_view')
-      .where({ id: boat_id, view_name: view })
+      .where({ boat_id: boat_id, view_name: view })
       .first();
 
     if (existingBoat) {
       await db('boats_view')
-        .where({ id: boat_id, view_name: view })
+        .where({ id: viewID, view_name: view })
         .update({ lat, lon, rotation });
 
       res.status(200).send('Boat position updated');
