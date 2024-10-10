@@ -116,7 +116,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         <div>
           <Button color="inherit" onClick={() => handleViewChange('Parking')}>Parking View</Button>
-          {/* <Button color="inherit" onClick={() => handleViewChange('Friday')}>Friday View</Button> */}
+          <Button color="inherit" onClick={() => handleViewChange('Friday')}>Friday View</Button>
           <Button color="inherit" onClick={() => handleViewChange('SaturdaySunday')}>Saturday/Sunday View</Button>
           {isAuthenticated && (
             <Button color="inherit" onClick={handleStationEditorClick}>
