@@ -9,7 +9,8 @@ import DeleteBoatModal from './components/DeleteBoatModal';
 import BoatFeature from './components/BoatFeature';
 import ToolbarWithModal from './components/ToolbarWithModal';
 import { Button } from '@mui/material';
-import StationEditor from './components/StationEditor'; 
+import StationEditor from './components/StationEditor';
+import StationCard from './components/StationCard'; // Import the new component
 import './App.css';
 
 function App() {
@@ -46,7 +47,6 @@ function App() {
   const handleBoatDrop = (e, boatId, boatName, category) => {
     const map = mapRef.current;
 
-    // Check if map is initialized and the event is defined
     if (!map || !e) {
       console.error('Map is not initialized or event is null.');
       return;
@@ -58,22 +58,8 @@ function App() {
       return;
     }
 
-    // Get the coordinates from the pixel
     const coords = map.getCoordinateFromPixel(pixel);
-    console.log('Coordinates from pixel:', coords);
-
-    if (!coords) {
-      console.error('Could not get coordinates from pixel.');
-      return;
-    }
-
     const lonLat = toLonLat(coords);
-    console.log('Converted Lon/Lat:', lonLat);
-
-    if (!lonLat || lonLat.length < 2) {
-      console.error('Could not convert coordinates to lon/lat:', coords);
-      return;
-    }
 
     const boatFeature = BoatFeature({ lat: lonLat[1], lon: lonLat[0], name: boatName, id: boatId, category });
     vectorSourceRef.current.addFeature(boatFeature);
@@ -85,7 +71,6 @@ function App() {
       lon: lonLat[0],
       view: activeView,
     }).then((response) => {
-      console.log('Boat position updated', response);
       setBoats(prevBoats => prevBoats.filter(boat => boat.id !== boatId));
       setMapBoats(prevBoats => [...prevBoats, { id: boatId, name: boatName, lat: lonLat[1], lon: lonLat[0], category }]);
     }).catch((error) => {
@@ -168,6 +153,8 @@ function App() {
             </>
           } />
           <Route path="/station-editor" element={<StationEditor />} />
+          {/* Add the route for StationCard */}
+          <Route path="/station/:view/:name" element={<StationCard />} />
         </Routes>
       </div>
     </Router>

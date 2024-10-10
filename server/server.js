@@ -191,6 +191,32 @@ app.get('/api/boats_view/:view', async (req, res) => {
   }
 });
 
+// Route to get specific boat details by view and name
+app.get('/api/boats_view/:view/:name', async (req, res) => {
+  const { view, name } = req.params;
+
+  try {
+    // Join boats_view and boats table to get boat details
+    const boatDetails = await db('boats_view')
+      .join('boats', 'boats_view.boat_id', '=', 'boats.id')
+      .select('boats_view.*', 'boats.*') // Select columns from both tables
+      .where({
+        'boats_view.view_name': view,
+      })
+      .andWhere(db.raw("REPLACE(boats.name, ' ', '') = ?", [name.replace(/\s/g, '')])) // Remove spaces from both `boats.name` and the `name` parameter
+      .first(); // Get only the first matching record
+
+    if (!boatDetails) {
+      return res.status(404).json({ error: 'Boat not found' });
+    }
+
+    res.json(boatDetails); // Return the boat details
+  } catch (error) {
+    console.error('Error fetching boat details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.post('/api/boats_view/insert', async (req, res) => {
   const { boat_id, lat, lon, view, rotation } = req.body;
 
