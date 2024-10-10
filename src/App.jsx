@@ -64,7 +64,6 @@ function App() {
     const boatFeature = BoatFeature({ lat: lonLat[1], lon: lonLat[0], name: boatName, id: boatId, category });
     vectorSourceRef.current.addFeature(boatFeature);
     map.updateSize();
-    console.log('Test', boatId, boatName, lonLat, activeView);
     axios.post('/api/boats_view/insert', {
       boat_id: boatId,
       lat: lonLat[1],

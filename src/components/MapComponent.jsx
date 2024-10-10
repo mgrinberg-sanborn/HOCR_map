@@ -120,11 +120,14 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
 
           const [lon, lat] = toLonLat(clickedFeature.getGeometry().getCoordinates());
           console.log('boat', clickedFeature.get('boat_id'), 'rotated to', newRotation);
+          const boatId = clickedFeature.get('boat_id');
+          const viewID = clickedFeature.get('viewID');
           axios.post('/api/boats_view/insert', {
-            boat_id: clickedFeature.get('boat_id'),
+            boat_id: boatId,
             lat,
             lon,
             rotation: newRotation,
+            viewID: viewID,
             view: activeView,
           }).then((response) => {
             console.log('Boat rotation updated:', response);
