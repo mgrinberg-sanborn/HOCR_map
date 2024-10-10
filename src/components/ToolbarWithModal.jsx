@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Button, Modal, Box, Typography, TextField, Tabs, Tab, Snackbar, Alert } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
 const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIsEditor, setActiveView }) => {
   const [open, setOpen] = useState(false);
@@ -9,6 +10,8 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
     password: '',
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  const navigate = useNavigate(); // Initialize navigate
 
   // Check authentication state from the server on component mount
   useEffect(() => {
@@ -101,6 +104,11 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
 
   const handleViewChange = (view) => {
     setActiveView(view);
+    navigate('/'); // Navigate back to the root route
+  };
+
+  const handleStationEditorClick = () => {
+    navigate('/station-editor'); // Navigate to the station editor route
   };
 
   return (
@@ -111,7 +119,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
           {/* <Button color="inherit" onClick={() => handleViewChange('Friday')}>Friday View</Button> */}
           <Button color="inherit" onClick={() => handleViewChange('SaturdaySunday')}>Saturday/Sunday View</Button>
           {isAuthenticated && (
-            <Button color="inherit" onClick={() => handleViewChange('StationEditor')}>
+            <Button color="inherit" onClick={handleStationEditorClick}>
               Station Editor
             </Button>
           )}

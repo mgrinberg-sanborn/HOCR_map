@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -7,7 +7,7 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import { Modify } from 'ol/interaction';
-import { Control } from 'ol/control'; // Import Control for custom controls
+import { Control } from 'ol/control';
 import axios from 'axios';
 import BoatFeature from './BoatFeature';
 import { Style, Icon } from 'ol/style';
@@ -17,7 +17,10 @@ import '../MapComponent.css'; // Import a CSS file for styles
 
 const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthenticated, isEditor, activeView }) => {
   const mapElementRef = useRef(null);
-  const olMapRef = useRef(null); // Store the OpenLayers map instance
+  const olMapRef = useRef(null); 
+  const [popupContent, setPopupContent] = useState(null);
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupPosition, setPopupPosition] = useState([0, 0]);
 
   const viewConfigurations = {
     Parking: {
@@ -52,14 +55,14 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
 
     vectorSourceRef.current.map = olMap; 
     mapRef.current = olMap; 
-    olMapRef.current = olMap; // Store the map instance in the ref
+    olMapRef.current = olMap; 
 
     // Create a home button control
     const homeButton = document.createElement('button');
-    homeButton.className = 'home-button'; // Add a class for styling
-    homeButton.innerHTML = '🏠'; // Use an emoji for the home icon
+    homeButton.className = 'home-button';
+    homeButton.innerHTML = '🏠';
 
-    homeButton.addEventListener('click', resetMapView); // Attach the click event
+    homeButton.addEventListener('click', resetMapView); 
 
     // Create a control for the button and add it to the map
     olMap.addControl(new Control({ element: homeButton }));
@@ -130,6 +133,33 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
       }
     });
 
+    // Add pointermove event to show the popup
+    olMap.on('pointermove', (event) => {
+      const feature = olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+      if (feature && !isAuthenticated && !isEditor && activeView != 'Parking') {
+        const boat = feature.getProperties();
+        const content = `
+          <div>
+            <strong>Water or Land:</strong> ${boat.WaterorLand}<br>
+            <strong>Zone:</strong> ${boat.zone}<br>
+            <strong>Position:</strong> ${boat.position}<br>
+            <strong>Assignment:</strong> ${boat.assignment}<br>
+            <strong>Motor Position:</strong> ${boat.motor_position}<br>
+            <strong>At Ready Position:</strong> ${boat.at_ready_position}<br>
+            <strong>Nearest Bio-break Location:</strong> ${boat.nearest_biobreak_location}
+          </div>
+        `;
+        setPopupContent(content);
+    
+        // Convert the map coordinate to pixel values
+        const pixel = olMap.getPixelFromCoordinate(event.coordinate);
+        setPopupPosition([pixel[0], pixel[1]]);
+        setPopupVisible(true);
+      } else {
+        setPopupVisible(false);
+      }
+    });
+
     return () => olMap.setTarget(undefined);
   }, [vectorSourceRef, isAuthenticated, isEditor, activeView]); 
 
@@ -141,13 +171,12 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
 
         if (!boatData || boatData.length === 0) {
           console.error('No boat data received from API or API returned empty data.');
-          vectorSourceRef.current.clear(); // Clear existing features
+          vectorSourceRef.current.clear(); 
           return;
         }
 
         setMapBoats(boatData);
 
-        // Clear existing features before adding new ones
         vectorSourceRef.current.clear(); 
 
         const features = boatData.map(boat => {
@@ -167,7 +196,7 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
       .catch((error) => {
         console.error('Error fetching boat data:', error);
       });
-  }, [setMapBoats, vectorSourceRef, activeView]); // Include activeView to refetch on change
+  }, [setMapBoats, vectorSourceRef, activeView]); 
 
   // Function to reset the map view to the default extent
   const resetMapView = () => {
@@ -177,7 +206,14 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
   };
 
   return (
-    <div ref={mapElementRef} style={{ width: '100%', height: '80vh' }}></div>
+    <div style={{ position: 'relative' }}>
+      <div ref={mapElementRef} style={{ width: '100%', height: '80vh' }}></div>
+      {popupVisible && (
+        <div className="popup" style={{ position: 'absolute', left: popupPosition[0], top: popupPosition[1] }}>
+          <div dangerouslySetInnerHTML={{ __html: popupContent }} />
+        </div>
+      )}
+    </div>
   );
 };
 

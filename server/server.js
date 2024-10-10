@@ -138,13 +138,57 @@ app.get('/api/boats', async (req, res) => {
   }
 });
 
+app.put('/api/boats', async (req, res) => {
+  const boats = req.body; // Expecting an array of boats to be updated
+
+  try {
+    // Start a transaction for safe updates
+    await db.transaction(async trx => {
+      // Loop through each boat and update
+      for (const boat of boats) {
+        const { id, name, category, number, WaterorLand, Zone, Position, assignment, motor_position, at_ready_position, nearest_biobreak_location, launch_origin, launch_type, notes } = boat;
+
+        // Update each boat based on its ID
+        await trx('boats')
+          .where({ id }) // Assuming 'id' is the primary key
+          .update({
+            name,
+            category,
+            number,
+            WaterorLand,
+            Zone,
+            Position,
+            assignment,
+            motor_position,
+            at_ready_position,
+            nearest_biobreak_location,
+            launch_origin,
+            launch_type,
+            notes,
+          });
+      }
+    });
+
+    res.status(200).json({ message: 'Boats updated successfully' });
+  } catch (error) {
+    console.error('Error updating boats:', error);
+    res.status(500).json({ error: 'An error occurred while updating boats.' });
+  }
+});
+
 app.get('/api/boats_view/:view', async (req, res) => {
   const { view } = req.params;
-  const boatsView = await db('boats_view')
-    .join('boats', 'boats_view.boat_id', '=', 'boats.id')
-    .select('boats_view.id', 'boats_view.lat', 'boats_view.lon', 'boats_view.boat_id', 'boats.name', 'boats.category', 'boats_view.rotation')
-    .where({ view_name: view });
-  res.json(boatsView);
+  try {
+    const boatsView = await db('boats_view')
+      .join('boats', 'boats_view.boat_id', '=', 'boats.id')
+      .select('boats_view.*', 'boats_view.id as viewID', 'boats.*') // Select all columns from boats_view
+      .where({ view_name: view });
+
+    res.json(boatsView);
+  } catch (error) {
+    console.error('Error fetching boats view:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.post('/api/boats_view/insert', async (req, res) => {

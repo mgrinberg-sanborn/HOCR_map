@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
 import VectorSource from 'ol/source/Vector';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import axios from 'axios';
@@ -8,6 +9,7 @@ import DeleteBoatModal from './components/DeleteBoatModal';
 import BoatFeature from './components/BoatFeature';
 import ToolbarWithModal from './components/ToolbarWithModal';
 import { Button } from '@mui/material';
+import StationEditor from './components/StationEditor'; 
 import './App.css';
 
 function App() {
@@ -38,7 +40,6 @@ function App() {
     axios.get(`/api/boats_view/${activeView}`).then((response) => {
       const updatedBoatData = response.data;
       setMapBoats(updatedBoatData);
-      
     });
   }, [activeView]);
 
@@ -93,11 +94,11 @@ function App() {
   };
 
   const handleDeleteBoat = () => {
-    const selectedFeature = vectorSourceRef.current.getFeatures().find(feature => feature.get('id') === selectedBoat);
+    const selectedFeature = vectorSourceRef.current.getFeatures().find(feature => feature.get('viewID') === selectedBoat);
     if (selectedFeature) {
       vectorSourceRef.current.removeFeature(selectedFeature);
 
-      axios.delete(`/api/boats_view/${selectedBoat}`)
+      axios.delete(`/api/boats_view/${activeView}/${selectedBoat}`)
         .then(() => {
           setMapBoats((prevBoats) => prevBoats.filter((boat) => boat.id !== selectedBoat));
 
@@ -125,42 +126,51 @@ function App() {
   };
 
   return (
-    <div>
-      <ToolbarWithModal 
-        isAuthenticated={isAuthenticated} 
-        setIsAuthenticated={setIsAuthenticated} 
-        isEditor={isEditor} 
-        setIsEditor={setIsEditor}
-        activeView={activeView}
-        setActiveView={setActiveView}
-      />
-      <MapComponent 
-        mapBoats={mapBoats} 
-        setMapBoats={setMapBoats} 
-        vectorSourceRef={vectorSourceRef} 
-        mapRef={mapRef} 
-        isAuthenticated={isAuthenticated}  
-        isEditor={isEditor}    
-        activeView={activeView}
-        setActiveView={setActiveView}
-      />
-      {isAuthenticated && isEditor && (
-        <>
-          <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} />
-          <Button variant="outlined" onClick={openDeleteModal}>
-            Open Delete Boat Modal
-          </Button>
-        </>
-      )}
-      <DeleteBoatModal
-        open={open}
-        setOpen={setOpen}
-        selectedBoat={selectedBoat}
-        setSelectedBoat={setSelectedBoat}
-        mapBoats={mapBoats} // Use filtered boats for the active view
-        handleDeleteBoat={handleDeleteBoat}
-      />
-    </div>
+    <Router>
+      <div>
+        <ToolbarWithModal 
+          isAuthenticated={isAuthenticated} 
+          setIsAuthenticated={setIsAuthenticated} 
+          isEditor={isEditor} 
+          setIsEditor={setIsEditor}
+          activeView={activeView}
+          setActiveView={setActiveView}
+        />
+        <Routes>
+          <Route path="/" element={
+            <>
+              <MapComponent 
+                mapBoats={mapBoats} 
+                setMapBoats={setMapBoats} 
+                vectorSourceRef={vectorSourceRef} 
+                mapRef={mapRef} 
+                isAuthenticated={isAuthenticated}  
+                isEditor={isEditor}    
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
+              {isAuthenticated && isEditor && (
+                <>
+                  <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} activeView={activeView} setActiveView={setActiveView} />
+                  <Button variant="outlined" onClick={openDeleteModal}>
+                    Open Delete Boat Modal
+                  </Button>
+                </>
+              )}
+              <DeleteBoatModal
+                open={open}
+                setOpen={setOpen}
+                selectedBoat={selectedBoat}
+                setSelectedBoat={setSelectedBoat}
+                mapBoats={mapBoats} 
+                handleDeleteBoat={handleDeleteBoat}
+              />
+            </>
+          } />
+          <Route path="/station-editor" element={<StationEditor />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

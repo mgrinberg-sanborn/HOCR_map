@@ -8,7 +8,7 @@ const DeleteBoatModal = ({ open, setOpen, selectedBoat, setSelectedBoat, mapBoat
         <h2>Deleting a Boat (Refresh if deleting recently Added)</h2>
         <Select value={selectedBoat} onChange={(e) => setSelectedBoat(e.target.value)} fullWidth>
           {mapBoats.map((boat) => (
-            <MenuItem key={boat.id} value={boat.id}>
+            <MenuItem key={boat.viewID} value={boat.viewID}>
               {boat.name}
             </MenuItem>
           ))}
