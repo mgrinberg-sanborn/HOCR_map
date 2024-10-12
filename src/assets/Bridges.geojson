@@ -1,0 +1,137 @@
+{
+  "type" : "FeatureCollection", 
+  "features" : [
+    {
+      "type" : "Feature", 
+      "id" : 1, 
+      "geometry" : 
+      {
+        "type" : "LineString", 
+        "coordinates" : 
+        [
+          [-71.1107183372525, 42.3518882667742], 
+          [-71.1105612789373, 42.3530903270475]
+        ]
+      }, 
+      "properties" : {
+        "FID" : 1, 
+        "Shape_Leng" : 440.111596826, 
+        "BridgeNumb" : 1, 
+        "BridgeName" : "B.U. Bridge", 
+        "ImageLink" : "https://kubrick.htvapps.com/htv-prod-media.s3.amazonaws.com/ibmig/cms/image/wcvb/33419134-33419134.jpg?crop=1xw:0.75000000000000000xh;center,top&resize=900:*", 
+        "ImageSourc" : "WCVB", 
+        "Shape__Length" : 181.91136319454483
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 2, 
+      "geometry" : 
+      {
+        "type" : "LineString", 
+        "coordinates" : 
+        [
+          [-71.1174278973323, 42.361016443178], 
+          [-71.1159639169853, 42.3614738319112]
+        ]
+      }, 
+      "properties" : {
+        "FID" : 2, 
+        "Shape_Leng" : 429.343701363, 
+        "BridgeNumb" : 2, 
+        "BridgeName" : "River Street Bridge", 
+        "ImageLink" : "https://upload.wikimedia.org/wikipedia/commons/2/28/River_street_bridge_cambridge.JPG", 
+        "ImageSourc" : "Wikipedia", 
+        "Shape__Length" : 176.93860679859407
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 3, 
+      "geometry" : 
+      {
+        "type" : "LineString", 
+        "coordinates" : 
+        [
+          [-71.1177816918029, 42.3641890782968], 
+          [-71.1160848210961, 42.3642819434062]
+        ]
+      }, 
+      "properties" : {
+        "FID" : 3, 
+        "Shape_Leng" : 459.835467228, 
+        "BridgeNumb" : 3, 
+        "BridgeName" : "Western Avenue Bridge", 
+        "ImageLink" : "https://upload.wikimedia.org/wikipedia/commons/9/94/Western_avenue_bridge_cambridge.JPG", 
+        "ImageSourc" : "Wikipedia", 
+        "Shape__Length" : 189.41222297048702
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 4, 
+      "geometry" : 
+      {
+        "type" : "LineString", 
+        "coordinates" : 
+        [
+          [-71.1188377363148, 42.3678452528061], 
+          [-71.1177140726411, 42.3689051933919]
+        ]
+      }, 
+      "properties" : {
+        "FID" : 4, 
+        "Shape_Leng" : 491.335674597, 
+        "BridgeNumb" : 4, 
+        "BridgeName" : "Weeks Footbridge", 
+        "ImageLink" : "https://upload.wikimedia.org/wikipedia/commons/7/75/Weeks_Footbridge_Cambridge%2C_MA.jpg", 
+        "ImageSourc" : "Wikipedia", 
+        "Shape__Length" : 202.85728956530085
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 5, 
+      "geometry" : 
+      {
+        "type" : "LineString", 
+        "coordinates" : 
+        [
+          [-71.1236219624817, 42.3684369458872], 
+          [-71.1227471828506, 42.3694647079988]
+        ]
+      }, 
+      "properties" : {
+        "FID" : 5, 
+        "Shape_Leng" : 442.905282849, 
+        "BridgeNumb" : 5, 
+        "BridgeName" : "Lars Anderson Bridge", 
+        "ImageLink" : "https://upload.wikimedia.org/wikipedia/commons/6/68/Anderson_Bridge_Cambridge.jpg", 
+        "ImageSourc" : "Wikipedia", 
+        "Shape__Length" : 182.92865101556086
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 6, 
+      "geometry" : 
+      {
+        "type" : "LineString", 
+        "coordinates" : 
+        [
+          [-71.1334046176597, 42.3714997960523], 
+          [-71.132267213019, 42.3720152677821]
+        ]
+      }, 
+      "properties" : {
+        "FID" : 6, 
+        "Shape_Leng" : 360.213740353, 
+        "BridgeNumb" : 6, 
+        "BridgeName" : "Charles Elliot Bridge", 
+        "ImageLink" : "https://bostonglobe-prod.cdn.arcpublishing.com/resizer/kWz5kQLqYih4uoj4sMSKsXg7xAs=/1440x0/arc-anglerfish-arc2-prod-bostonglobe.s3.amazonaws.com/public/M3LNPIVXPII6PI7MVN5DCE5XF4.jpg", 
+        "ImageSourc" : "Boston Globe", 
+        "Shape__Length" : 148.54006789738466
+      }
+    }
+  ]
+}

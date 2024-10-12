@@ -7,7 +7,7 @@ exports.up = async function(knex) {
         table.text('WaterorLand');
         table.integer('Zone');
         table.varchar('Position');
-        table.varchar('assignment');
+        table.text('assignment');
         table.varchar('motor_position');
         table.varchar('at_ready_position');
         table.varchar('nearest_biobreak_location');

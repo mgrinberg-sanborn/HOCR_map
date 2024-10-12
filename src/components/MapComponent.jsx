@@ -3,6 +3,7 @@ import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
+import GeoJSON from 'ol/format/GeoJSON'; 
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { fromLonLat, toLonLat } from 'ol/proj';
@@ -10,10 +11,12 @@ import { Modify } from 'ol/interaction';
 import { Control } from 'ol/control';
 import axios from 'axios';
 import BoatFeature from './BoatFeature';
-import { Style, Icon } from 'ol/style';
+import { Style, Icon, Fill, Stroke } from 'ol/style';
 import { Point } from 'ol/geom';
 import Feature from 'ol/Feature';
-import '../MapComponent.css'; // Import a CSS file for styles
+import FridayPractice from '../assets/FridayPractice.geojson';
+
+import '../MapComponent.css'; 
 
 const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthenticated, isEditor, activeView }) => {
   const mapElementRef = useRef(null);
@@ -30,9 +33,9 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
       minZoom: 20,
     },
     Friday: {
-      center: fromLonLat([-71.0969, 42.3553]),
-      zoom: 15,
-      maxZoom: 18,
+      center: fromLonLat([-71.1310, 42.3700]),
+      zoom: 17.5,
+      maxZoom: 19,
       minZoom: 15,
     },
     SaturdaySunday: {
@@ -43,13 +46,40 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
     },
   };
 
+  const geojsonStyleFunction = (feature) => {
+    return new Style({
+      fill: new Fill({
+        color: 'black',
+      }),
+      stroke: new Stroke({
+        color: 'black',
+        width: 1,
+      }),
+    });
+  };
+
   useEffect(() => {
+    const layers = [
+      new TileLayer({ source: new OSM() }),
+    ];
+
+    // Only add the GeoJSON vector layer if activeView is 'Friday'
+    if (activeView === 'Friday') {
+      const geojsonVectorSource = new VectorSource({
+        url: FridayPractice,
+        format: new GeoJSON(),
+      });
+      const geojsonLayer = new VectorLayer({
+        source: geojsonVectorSource,
+        style: geojsonStyleFunction,
+      });
+
+      layers.push(geojsonLayer);
+    }
+
     const olMap = new Map({
       target: mapElementRef.current,
-      layers: [
-        new TileLayer({ source: new OSM() }),
-        new VectorLayer({ source: vectorSourceRef.current }),
-      ],
+      layers: layers,
       view: new View(viewConfigurations[activeView]),
     });
 
@@ -57,53 +87,53 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
     mapRef.current = olMap; 
     olMapRef.current = olMap; 
 
-    // Create a home button control
     const homeButton = document.createElement('button');
     homeButton.className = 'home-button';
     homeButton.innerHTML = '🏠';
-
-    homeButton.addEventListener('click', resetMapView); 
-
-    // Create a control for the button and add it to the map
+    homeButton.addEventListener('click', resetMapView);
     olMap.addControl(new Control({ element: homeButton }));
 
-    const modify = new Modify({ source: vectorSourceRef.current });
+    // Modify interaction if user is authenticated and editor
     if (isAuthenticated && isEditor) {
-      olMap.addInteraction(modify);
-
+      const modify = new Modify({ source: vectorSourceRef.current });
       modify.on('modifyend', (e) => {
         e.features.forEach((feature) => {
-          const geometry = feature.getGeometry();
-          const [lon, lat] = toLonLat(geometry.getCoordinates());
           const boatId = feature.get('boat_id');
-          const viewID = feature.get('viewID');
-          const rotation = feature.get('rotation') || 0;
-          axios.post('/api/boats_view/insert', {
-            boat_id: boatId,
-            lat,
-            lon,
-            rotation,
-            viewID: viewID,
-            view: activeView,
-          })
-          .then((response) => {
-            console.log('Boat position and rotation updated:', response);
-          })
-          .catch((error) => {
-            console.error('Error updating boat position and rotation:', error);
-          });
+          if (boatId) {
+            olMap.addInteraction(modify);
+            const geometry = feature.getGeometry();
+            const [lon, lat] = toLonLat(geometry.getCoordinates());
+            const viewID = feature.get('viewID');
+            const rotation = feature.get('rotation') || 0;
+
+            axios.post('/api/boats_view/insert', {
+              boat_id: boatId,
+              lat,
+              lon,
+              rotation,
+              viewID: viewID,
+              view: activeView,
+            })
+            .then((response) => {
+              console.log('Boat position updated:', response);
+            })
+            .catch((error) => {
+              console.error('Error updating boat position:', error);
+            });
+          }
         });
       });
     }
 
     olMap.on('click', (event) => {
+      // Rotate boat on shift-click
       if (event.originalEvent.shiftKey) {
         const clickedFeature = olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
 
         if (clickedFeature) {
           const currentStyle = clickedFeature.getStyle();
           const currentRotation = clickedFeature.get('rotation') || 0;
-          const newRotation = currentRotation + (20 * Math.PI / 180); 
+          const newRotation = currentRotation + (20 * Math.PI / 180);
 
           clickedFeature.set('rotation', newRotation);
           clickedFeature.setStyle(
@@ -119,7 +149,6 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
           olMap.render();
 
           const [lon, lat] = toLonLat(clickedFeature.getGeometry().getCoordinates());
-          console.log('boat', clickedFeature.get('boat_id'), 'rotated to', newRotation);
           const boatId = clickedFeature.get('boat_id');
           const viewID = clickedFeature.get('viewID');
           axios.post('/api/boats_view/insert', {
@@ -138,10 +167,9 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
       }
     });
 
-    // Add pointermove event to show the popup
     olMap.on('pointermove', (event) => {
       const feature = olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
-      if (feature && !isAuthenticated && !isEditor && activeView != 'Parking') {
+      if (feature && feature.values_.boat_id && !isAuthenticated && !isEditor && activeView !== 'Parking') {
         const boat = feature.getProperties();
         const content = `
           <div>
@@ -156,7 +184,6 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
         `;
         setPopupContent(content);
     
-        // Convert the map coordinate to pixel values
         const pixel = olMap.getPixelFromCoordinate(event.coordinate);
         setPopupPosition([pixel[0], pixel[1]]);
         setPopupVisible(true);
@@ -166,44 +193,30 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
     });
 
     return () => olMap.setTarget(undefined);
-  }, [vectorSourceRef, isAuthenticated, isEditor, activeView]); 
+  }, [vectorSourceRef, isAuthenticated, isEditor, activeView]);
 
   useEffect(() => {
-    // Fetch and update boat data whenever activeView changes
+    vectorSourceRef.current.clear();
+
+    // Fetch boats for the active view
     axios.get(`/api/boats_view/${activeView}`)
       .then((response) => {
         const boatData = response.data;
-
         if (!boatData || boatData.length === 0) {
-          console.error('No boat data received from API or API returned empty data.');
-          vectorSourceRef.current.clear(); 
           return;
         }
-
         setMapBoats(boatData);
-
-        vectorSourceRef.current.clear(); 
-
-        const features = boatData.map(boat => {
-          const feature = BoatFeature(boat); 
-          if (!feature) {
-            console.error('Invalid boat feature for:', boat);
-          }
-          return feature;
-        }).filter(Boolean);
-
+        const features = boatData.map(boat => BoatFeature(boat)).filter(Boolean);
         vectorSourceRef.current.addFeatures(features);
-
         if (vectorSourceRef.current.map) {
-          vectorSourceRef.current.map.render(); 
+          vectorSourceRef.current.map.render();
         }
       })
       .catch((error) => {
         console.error('Error fetching boat data:', error);
       });
-  }, [setMapBoats, vectorSourceRef, activeView]); 
+  }, [setMapBoats, vectorSourceRef, activeView]);
 
-  // Function to reset the map view to the default extent
   const resetMapView = () => {
     const viewConfig = viewConfigurations[activeView];
     olMapRef.current.getView().setCenter(viewConfig.center);

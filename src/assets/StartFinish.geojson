@@ -1,0 +1,43 @@
+{
+  "type" : "FeatureCollection", 
+  "features" : [
+    {
+      "type" : "Feature", 
+      "id" : 1, 
+      "geometry" : 
+      {
+        "type" : "LineString", 
+        "coordinates" : 
+        [
+          [-71.1078281030896, 42.3529709692253], 
+          [-71.1079436113078, 42.3520200938582]
+        ]
+      }, 
+      "properties" : {
+        "FID" : 1, 
+        "Shape_Leng" : 347.925282699, 
+        "Location" : "Start", 
+        "Shape__Length" : 143.80865924790547
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 2, 
+      "geometry" : 
+      {
+        "type" : "LineString", 
+        "coordinates" : 
+        [
+          [-71.1364789478042, 42.3673975158595], 
+          [-71.135829795563, 42.3668022636207]
+        ]
+      }, 
+      "properties" : {
+        "FID" : 2, 
+        "Shape_Leng" : 278.983242593, 
+        "Location" : "Finish", 
+        "Shape__Length" : 115.17554511522661
+      }
+    }
+  ]
+}

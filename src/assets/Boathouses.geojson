@@ -1,0 +1,293 @@
+{
+  "type" : "FeatureCollection", 
+  "features" : [
+    {
+      "type" : "Feature", 
+      "id" : 1, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 1, 
+        "Boathouse" : "DeWolfe Boathouse", 
+        "Users" : "Boston University", 
+        "Longitude" : -71.107828, 
+        "Latitude" : 42.353093, 
+        "Construction_Year" : "1999", 
+        "Image_URL" : "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/BU_Boathouse.jpg/1024px-BU_Boathouse.jpg?1645051392081", 
+        "Sort" : 2, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 2, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 2, 
+        "Boathouse" : "Pierce Boathouse", 
+        "Users" : "MIT", 
+        "Longitude" : -71.0968, 
+        "Latitude" : 42.355421, 
+        "Construction_Year" : "1966", 
+        "Image_URL" : "https://www.brunercott.com/wp-content/uploads/2019/03/MIT-PierceBoathouse-RMandelkorn.jpg", 
+        "Sort" : 1, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 3, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 3, 
+        "Boathouse" : "Union Boat Club", 
+        "Users" : "UBC", 
+        "Longitude" : -71.073279, 
+        "Latitude" : 42.357764, 
+        "Construction_Year" : "unknown", 
+        "Image_URL" : "https://upload.wikimedia.org/wikipedia/commons/c/cb/Charles_River_Union_Club_Boathouse.jpg?1645051363540", 
+        "Sort" : 13, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 4, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 4, 
+        "Boathouse" : "Riverside Boat Club", 
+        "Users" : "Riverside Boat Club, Simmons University, BC High", 
+        "Longitude" : -71.115942, 
+        "Latitude" : 42.3581, 
+        "Construction_Year" : "1912", 
+        "Image_URL" : "https://upload.wikimedia.org/wikipedia/commons/a/ae/Charles_River_Riverside_Boat_Club.jpg", 
+        "Sort" : 3, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 5, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 5, 
+        "Boathouse" : "Harry Parker Boathouse", 
+        "Users" : "Community Rowing, Inc., Boston College, RowBoston", 
+        "Longitude" : -71.165516, 
+        "Latitude" : 42.358634, 
+        "Construction_Year" : "2008", 
+        "Image_URL" : "https://bceagles.com/images/2016/6/16/1.jpg", 
+        "Sort" : 11, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 6, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 6, 
+        "Boathouse" : "Daly Rink Boathouse", 
+        "Users" : "Newton Country Day School, Wellesley College, Daly Rink Scullers", 
+        "Longitude" : -71.170413, 
+        "Latitude" : 42.35881, 
+        "Construction_Year" : "1985", 
+        "Image_URL" : "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAoHCBUVFRgWFhYZGRgZGhwYGBocGh0ZHBwYGBoaHBwcIx4cJC4lHCUrIRoaJjgmKy8xNTU1HiQ7QDs0Py40NTEBDAwMEA8QHhISHzQrJSQ0NDQ0NDQ0NDQ0NjQ0NDQ0NDQ0NDY0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NP/AABEIAKwBJgMBIgACEQEDEQH/", 
+        "Sort" : 12, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 7, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 7, 
+        "Boathouse" : "Henderson Boathouse ", 
+        "Users" : "Northeastern University, Brookline High School, Boston Latin School", 
+        "Longitude" : -71.141526, 
+        "Latitude" : 42.364156, 
+        "Construction_Year" : "1989", 
+        "Image_URL" : "https://upload.wikimedia.org/wikipedia/commons/f/ff/Charles_River_Henderson_Boathouse.jpg", 
+        "Sort" : 10, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 8, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 8, 
+        "Boathouse" : "Weld Boathouse", 
+        "Users" : "Harvard University (Radcliffe)", 
+        "Longitude" : -71.122064, 
+        "Latitude" : 42.369225, 
+        "Construction_Year" : "1906", 
+        "Image_URL" : "https://s3.amazonaws.com/thumbnails.thecrimson.com/photos/2014/10/20/175523_1300080.jpg.1493x1000_q95_crop-smart_upscale.jpg", 
+        "Sort" : 4, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 9, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 9, 
+        "Boathouse" : "Newell Boathouse", 
+        "Users" : "Harvard University", 
+        "Longitude" : -71.125762, 
+        "Latitude" : 42.369608, 
+        "Construction_Year" : "1900", 
+        "Image_URL" : "https://s3.amazonaws.com/media.thecrimson.com/photos/2018/10/17/233758_1333203.jpg", 
+        "Sort" : 5, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 10, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 10, 
+        "Boathouse" : "Belmont Hill Winsor Schools Boathouse", 
+        "Users" : "Belmont Hill, Winsor School", 
+        "Longitude" : -71.132685, 
+        "Latitude" : 42.370601, 
+        "Construction_Year" : "2002", 
+        "Image_URL" : "https://upload.wikimedia.org/wikipedia/commons/e/ef/Charles_River_Belmont_Hill_and_Winsor_Schools_Boathouse.jpg", 
+        "Sort" : 8, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 11, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 11, 
+        "Boathouse" : "Cambridge Boat Club", 
+        "Users" : "Cambridge Boat Club, Cambridge Rindge and Latin School, Buckinham Browne and Nichols", 
+        "Longitude" : -71.1339, 
+        "Latitude" : 42.372205, 
+        "Construction_Year" : "1947", 
+        "Image_URL" : "https://upload.wikimedia.org/wikipedia/commons/9/93/Charles_River_Cambridge_Boatclub.jpg?1645051629637", 
+        "Sort" : 6, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 12, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 12, 
+        "Boathouse" : "MIT Sailing", 
+        "Users" : "MIT Sailing", 
+        "Longitude" : -71.087812, 
+        "Latitude" : 42.358563, 
+        "Construction_Year" : "1935", 
+        "Image_URL" : "https://sailing.mit.edu/info/pavilionext-cropped.jpg", 
+        "Sort" : 14, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 13, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 13, 
+        "Boathouse" : "Harvard Sailing", 
+        "Users" : "Harvard Sailing", 
+        "Longitude" : -71.082813, 
+        "Latitude" : 42.360062, 
+        "Construction_Year" : "1964", 
+        "Image_URL" : "https://www.crimsonsailingacademy.com/images/harvard-sailing-center.jpg", 
+        "Sort" : 15, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 14, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 14, 
+        "Boathouse" : "Community Boating", 
+        "Users" : "CBI", 
+        "Longitude" : 71.073063, 
+        "Latitude" : 42.359813, 
+        "Construction_Year" : "1946", 
+        "Image_URL" : "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAoHCBISEhgUEhUYGRgYHBocHBkZGRgaGBwaHRoZHBgaGhgcIS4mHB4rHxkZJjgnKy8xNTU2GiQ7QDs0Py40NTEBDAwMEA8QHhISHzosIys0MTQ9NDYxPzQ0NDQ0NDQ0NDY0NjY0NDQ0NjQ0NDY0NDQ2NDQ0NDQ0NDQ0NDQ0NDQ0Mf/AABEIAJ8BPgMBIgACEQEDEQH/", 
+        "Sort" : 16, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 15, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 15, 
+        "Boathouse" : "Charles River Canoe & Kayak Kendall", 
+        "Users" : "CRCK Kendall", 
+        "Longitude" : -71.082063, 
+        "Latitude" : 42.362938, 
+        "Construction_Year" : "unknown", 
+        "Image_URL" : "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/04/ab/43/eb/charles-river-canoe-kayak.jpg?w=1000&h=-1&s=1", 
+        "Sort" : 17, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 16, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 16, 
+        "Boathouse" : "Courageous Sailing", 
+        "Users" : "Courageous", 
+        "Longitude" : -71.051187, 
+        "Latitude" : 42.371813, 
+        "Construction_Year" : "unknown", 
+        "Image_URL" : "https://courageoussailing.org/wp-content/uploads/2016/10/5dc97aa1-7f46-4048-dfce-cb92294b0f36.jpg", 
+        "Sort" : 18, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 17, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 17, 
+        "Boathouse" : "Boston Latin/Brookline", 
+        "Users" : "Boston Latin, Brookline", 
+        "Longitude" : -71.141063, 
+        "Latitude" : 42.363813, 
+        "Construction_Year" : "2013", 
+        "Image_URL" : "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAoHCBUVFBcUFRUYGBcZGSEeGhoZGiIdIR0dIBkdIh0dIR0jICwjHiApICEdJDYlKS4vMzM0GSI4PjgyPSwyMy8BCwsLDw4PHhISHjcqIykyMjIyNDQyMjIyNDIyMjIyMjIyMjQyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIAMIBAwMBIgACEQEDEQH/", 
+        "Sort" : 9, 
+        "Field" : null
+      }
+    }, 
+    {
+      "type" : "Feature", 
+      "id" : 18, 
+      "geometry" : null, 
+      "properties" : {
+        "OBJECTID" : 18, 
+        "Boathouse" : "BB&N", 
+        "Users" : "BB&N", 
+        "Longitude" : -71.133707, 
+        "Latitude" : 42.37186, 
+        "Construction_Year" : "unknown", 
+        "Image_URL" : "https://mytours.imgix.net/uploads/000/073/956/original/tfss-d064c371-c4f4-48f8-b747-a0739a0d61cf-file-b2944621?fit=max&cs=srgb&fm=webp&q=70&s=5bb93b1ada4b2329b9f4d6178838164f", 
+        "Sort" : 7, 
+        "Field" : null
+      }
+    }
+  ]
+}
