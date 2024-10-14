@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'; 
 import VectorSource from 'ol/source/Vector';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import axios from 'axios';
@@ -24,11 +24,23 @@ function App() {
   const [activeView, setActiveView] = useState('Parking'); // Default view
   const vectorSourceRef = useRef(new VectorSource());
   const mapRef = useRef();
+  
+  const location = useLocation(); // Get location
+  const navigate = useNavigate(); // Get navigate function
 
   // Fetch boats on component mount
   useEffect(() => {
     axios.get('/api/boats').then((response) => setBoats(response.data));
   }, []);
+
+  // Update active view based on the URL path
+  useEffect(() => {
+    const path = location.pathname.split('/')[1]; // Get the first segment of the path
+    if (path) {
+      setActiveView(path);
+      navigate(`/${path}`); // Update the URL to reflect the active view
+    }
+  }, [location.pathname]); // Run effect when the pathname changes
 
   // Update draggable boats based on active view
   useEffect(() => {
@@ -44,8 +56,7 @@ function App() {
     });
   }, [activeView]);
 
-  const handleBoatDrop = (e, boatId, boatName, category) => {
-    console.log(boatId);
+  const handleBoatDrop = (e, boatId, boatName, category, WaterorLand) => {
     const map = mapRef.current;
   
     if (!map || !e) {
@@ -66,6 +77,7 @@ function App() {
       lat: lonLat[1],
       lon: lonLat[0],
       boat_id: boatId, // Keep as boat_id to match your BoatFeature function
+      WaterorLand: WaterorLand,
       name: boatName,
       category,
     };
@@ -76,11 +88,11 @@ function App() {
       lat: lonLat[1],
       lon: lonLat[0],
       view: activeView,
+      WaterorLand: WaterorLand,
     })
     .then((response) => {
       // Assuming the response contains viewID in the format
       const viewID = response.data.viewID.id; // Extract viewID directly as a string
-      console.log(viewID);
   
       // Now, create the boat feature after confirming the insert
       const boatFeature = BoatFeature({
@@ -88,7 +100,6 @@ function App() {
         viewID, // Add viewID to the boat object
       });
   
-      console.log('Boat feature:', boatFeature);
       vectorSourceRef.current.addFeature(boatFeature);
       map.updateSize();
   
@@ -148,52 +159,74 @@ function App() {
   };
 
   return (
-    <Router>
-      <div>
-        <ToolbarWithModal 
-          isAuthenticated={isAuthenticated} 
-          setIsAuthenticated={setIsAuthenticated} 
-          isEditor={isEditor} 
-          setIsEditor={setIsEditor}
-          activeView={activeView}
-          setActiveView={setActiveView}
-        />
-        <Routes>
-          <Route path="/" element={
-            <>
-              <MapComponent 
-                mapBoats={mapBoats} 
-                setMapBoats={setMapBoats} 
-                vectorSourceRef={vectorSourceRef} 
-                mapRef={mapRef} 
-                isAuthenticated={isAuthenticated}  
-                isEditor={isEditor}    
-                activeView={activeView}
-                setActiveView={setActiveView}
-              />
-              {isAuthenticated && isEditor && (
-                <>
-                  <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} activeView={activeView} setActiveView={setActiveView} />
-                  <Button variant="outlined" onClick={openDeleteModal}>
-Delete a Boat                  </Button>
-                </>
-              )}
-              <DeleteBoatModal
-                open={open}
-                setOpen={setOpen}
-                selectedBoat={selectedBoat}
-                setSelectedBoat={setSelectedBoat}
-                mapBoats={mapBoats} 
-                handleDeleteBoat={handleDeleteBoat}
-              />
-            </>
-          } />
-          <Route path="/station-editor" element={<StationEditor />} />
-          {/* Add the route for StationCard */}
-          <Route path="/station/:view/:name" element={<StationCard />} />
-        </Routes>
-      </div>
-    </Router>
+    <div>
+      <ToolbarWithModal 
+        isAuthenticated={isAuthenticated} 
+        setIsAuthenticated={setIsAuthenticated} 
+        isEditor={isEditor} 
+        setIsEditor={setIsEditor}
+        activeView={activeView}
+        setActiveView={setActiveView}
+      />
+      <Routes>
+        <Route path="/" element={
+          <>
+            <MapComponent 
+              mapBoats={mapBoats} 
+              setMapBoats={setMapBoats} 
+              vectorSourceRef={vectorSourceRef} 
+              mapRef={mapRef} 
+              isAuthenticated={isAuthenticated}  
+              isEditor={isEditor}    
+              activeView={activeView}
+              setActiveView={setActiveView}
+            />
+            {isAuthenticated && isEditor && (
+              <>
+                <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} activeView={activeView} setActiveView={setActiveView} />
+                <Button variant="outlined" onClick={openDeleteModal}>
+                  Delete a Boat
+                </Button>
+              </>
+            )}
+            <DeleteBoatModal
+              open={open}
+              setOpen={setOpen}
+              selectedBoat={selectedBoat}
+              setSelectedBoat={setSelectedBoat}
+              mapBoats={mapBoats} 
+              handleDeleteBoat={handleDeleteBoat}
+            />
+          </>
+        } />
+        <Route path="/station-editor" element={<StationEditor />} />
+        {/* Add the route for StationCard */}
+        <Route path="/station/:view/:name" element={<StationCard />} />
+        {/* Add routes for different views */}
+        <Route path="/:view" element={
+          <>
+            <MapComponent 
+              mapBoats={mapBoats} 
+              setMapBoats={setMapBoats} 
+              vectorSourceRef={vectorSourceRef} 
+              mapRef={mapRef} 
+              isAuthenticated={isAuthenticated}  
+              isEditor={isEditor}    
+              activeView={activeView}
+              setActiveView={setActiveView}
+            />
+            {isAuthenticated && isEditor && (
+              <>
+                <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} activeView={activeView} setActiveView={setActiveView} />
+                <Button variant="outlined" onClick={openDeleteModal}>
+                  Delete a Boat
+                </Button>
+              </>
+            )}
+          </>
+        } />
+      </Routes>
+    </div>
   );
 }
 

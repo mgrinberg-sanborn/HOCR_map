@@ -4,7 +4,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useMediaQuery } from '@mui/material';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
-const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIsEditor, setActiveView }) => {
+const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, setIsEditor }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0); // 0 = Login, 1 = Register
   const [formData, setFormData] = useState({
@@ -14,10 +14,8 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [anchorEl, setAnchorEl] = useState(null);
 
-
   const navigate = useNavigate(); // Initialize navigate
   const isMobile = useMediaQuery('(max-width:600px)'); // Media query for mobile screens
-
 
   // Check authentication state from the server on component mount
   useEffect(() => {
@@ -108,15 +106,6 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
     setIsEditor(false);
   };
 
-  const handleViewChange = (view) => {
-    setActiveView(view);
-    navigate('/'); // Navigate back to the root route
-  };
-
-  const handleStationEditorClick = () => {
-    navigate('/station-editor'); // Navigate to the station editor route
-  };
-
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -134,19 +123,19 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, isEditor, setIs
               <MenuIcon />
             </IconButton>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-              <MenuItem onClick={() => handleViewChange('Parking')}>Parking View</MenuItem>
-              <MenuItem onClick={() => handleViewChange('Friday')}>Friday View</MenuItem>
-              <MenuItem onClick={() => handleViewChange('SaturdaySunday')}>Saturday/Sunday View</MenuItem>
-              {isAuthenticated && <MenuItem onClick={handleStationEditorClick}>Station Editor</MenuItem>}
+              <MenuItem onClick={() => navigate('/Parking')}>Parking View</MenuItem>
+              <MenuItem onClick={() => navigate('/Friday')}>Friday View</MenuItem>
+              <MenuItem onClick={() => navigate('/SaturdaySunday')}>Saturday/Sunday View</MenuItem>
+              {isAuthenticated && <MenuItem onClick={() => navigate('/station-editor')}>Station Editor</MenuItem>}
             </Menu>
           </>
         ) : (
           <div>
-            <Button color="inherit" onClick={() => handleViewChange('Parking')}>Parking View</Button>
-            <Button color="inherit" onClick={() => handleViewChange('Friday')}>Friday View</Button>
-            <Button color="inherit" onClick={() => handleViewChange('SaturdaySunday')}>Saturday/Sunday View</Button>
+            <Button color="inherit" onClick={() => navigate('/Parking')}>Parking View</Button>
+            <Button color="inherit" onClick={() => navigate('/Friday')}>Friday View</Button>
+            <Button color="inherit" onClick={() => navigate('/SaturdaySunday')}>Saturday/Sunday View</Button>
             {isAuthenticated && (
-              <Button color="inherit" onClick={handleStationEditorClick}>Station Editor</Button>
+              <Button color="inherit" onClick={() => navigate('/station-editor')}>Station Editor</Button>
             )}
           </div>
         )}

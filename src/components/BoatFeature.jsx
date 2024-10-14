@@ -28,7 +28,6 @@ const BoatFeature = (boat) => { // Change to take boat directly
     nearest_biobreak_location,
   });
 
-  console.log(boatFeature);
   const fillColor = category === 'SL' ? 'red' : 'yellow';
 
   let svgIcon;

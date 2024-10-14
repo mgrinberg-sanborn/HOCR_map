@@ -39,7 +39,7 @@ const BoatToolbar = ({ draggableBoats, handleBoatDrop, activeView }) => {
                 key={boat.id}
                 className="boat-item"
                 draggable
-                onDragEnd={(e) => handleBoatDrop(e, boat.id, boat.name, boat.category)}
+                onDragEnd={(e) => handleBoatDrop(e, boat.id, boat.name, boat.category, boat.WaterorLand)}
               >
                 <img src={svgIconDataURL} alt={boat.name} width="50" height="20" />
               </div>

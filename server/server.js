@@ -219,7 +219,6 @@ app.get('/api/boats_view/:view/:name', async (req, res) => {
 
 app.post('/api/boats_view/insert', async (req, res) => {
   const { boat_id, lat, lon, view, rotation, viewID } = req.body;
-  console.log(req.body);
   try {
     const existingBoat = await db('boats_view')
       .where({ boat_id: boat_id, view_name: view })
