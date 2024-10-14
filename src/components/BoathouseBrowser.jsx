@@ -14,8 +14,10 @@ const BoathouseBrowser = () => {
     }, []);
 
     const handleBoathouseSelect = (boathouse) => {
-        setSelectedBoathouse(boathouse);
-        console.log('Browser', boathouse);
+        if (!selectedBoathouse || selectedBoathouse.properties.OBJECTID !== boathouse.properties.OBJECTID) {
+            setSelectedBoathouse(boathouse);
+            console.log('Browser selected:', boathouse);
+        }
     };
 
     if (!boathousesData) {

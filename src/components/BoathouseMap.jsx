@@ -11,13 +11,11 @@ import { Point } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
 
 const BoathouseMap = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
-    console.log('Map', selectedBoathouse)
     const mapRef = useRef(); // For the DOM element
     const mapInstanceRef = useRef(); // For the Map instance
     const featureRefs = useRef([]); // For tracking features
 
     useEffect(() => {
-        // Create the map instance only once
         const map = new Map({
             target: mapRef.current,
             layers: [
@@ -34,7 +32,6 @@ const BoathouseMap = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
         mapInstanceRef.current = map;
 
         return () => {
-            // Cleanup the map instance when component unmounts
             map.setTarget(undefined);
         };
     }, []);
@@ -63,24 +60,44 @@ const BoathouseMap = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
             const vectorSource = new VectorSource({ features });
             const vectorLayer = new VectorLayer({ source: vectorSource });
 
-            // Clear previous layers and add the new one
             mapInstanceRef.current.getLayers().clear();
             mapInstanceRef.current.addLayer(new TileLayer({ source: new OSM() }));
             mapInstanceRef.current.addLayer(vectorLayer);
 
-            // Set up click event for features
             mapInstanceRef.current.on('click', (event) => {
                 mapInstanceRef.current.forEachFeatureAtPixel(event.pixel, (feature) => {
                     const properties = feature.get('properties');
-                    console.log('Selected:', properties);
-                    onBoathouseSelect(properties);
+                    const id = properties.OBJECTID;
+
+                    const selectedFeature = {
+                        type: "Feature",
+                        id: id,
+                        properties: {
+                            OBJECTID: properties.OBJECTID,
+                            Boathouse: properties.Boathouse,
+                            Users: properties.Users,
+                            Longitude: properties.Longitude,
+                            Latitude: properties.Latitude,
+                            Construction_Year: properties.Construction_Year,
+                            Image_URL: properties.Image_URL,
+                            sort: properties.sort,
+                        }
+                    };
+
+                    // Debug logs to inspect current and new selections
+                    console.log('Current selected:', selectedBoathouse);
+                    console.log('New selected:', selectedFeature);
+
+                    if (!selectedBoathouse || selectedBoathouse.properties.OBJECTID !== selectedFeature.properties.OBJECTID) {
+                        console.log('Selecting new feature:', selectedFeature);
+                        onBoathouseSelect(selectedFeature); // Pass the new format to the callback
+                    }
                 });
             });
         }
     }, [boathouses, onBoathouseSelect]);
 
     useEffect(() => {
-        console.log(selectedBoathouse);
         if (selectedBoathouse && mapInstanceRef.current) {
             const coords = [
                 selectedBoathouse.properties.Longitude,
@@ -94,13 +111,12 @@ const BoathouseMap = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
                 });
             }
 
-            // Update styles of all features based on selection
             featureRefs.current.forEach((feature) => {
                 const isSelected = feature.get('properties').OBJECTID === selectedBoathouse.properties.OBJECTID;
                 feature.setStyle(new Style({
                     image: new Circle({
-                        radius: isSelected ? 10 : 7, // Make selected larger
-                        fill: new Fill({ color: isSelected ? 'red' : 'blue' }), // Change color if selected
+                        radius: isSelected ? 10 : 7,
+                        fill: new Fill({ color: isSelected ? 'red' : 'blue' }),
                         stroke: new Stroke({ color: 'white', width: 2 }),
                     }),
                 }));
@@ -108,9 +124,7 @@ const BoathouseMap = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
         }
     }, [selectedBoathouse]);
 
-    return (
-            <div ref={mapRef} style={{ width: '100%', height: '25vh' }}></div>
-    );
+    return <div ref={mapRef} style={{ width: '100%', height: '25vh' }}></div>;
 };
 
 export default BoathouseMap;

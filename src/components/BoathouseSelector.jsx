@@ -3,13 +3,19 @@ import { MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 
 const BoathouseSelector = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
     const [selectedUser, setSelectedUser] = useState('');
-    const [selectedBoathouseId, setSelectedBoathouseId] = useState(selectedBoathouse?.OBJECTID || '');
+    const [selectedBoathouseId, setSelectedBoathouseId] = useState(selectedBoathouse?.properties.OBJECTID || '');
 
     useEffect(() => {
         // When selectedBoathouse changes, update boathouseId and associated user
         if (selectedBoathouse) {
-            setSelectedBoathouseId(selectedBoathouse.OBJECTID);
-            setSelectedUser(selectedBoathouse.properties.Users);
+            const newBoathouseId = selectedBoathouse.properties.OBJECTID;
+            const newUser = selectedBoathouse.properties.Users;
+
+            // Only update if the new values are different
+            if (newBoathouseId !== selectedBoathouseId) {
+                setSelectedBoathouseId(newBoathouseId);
+                setSelectedUser(newUser);
+            }
         } else {
             setSelectedBoathouseId('');
             setSelectedUser('');
@@ -21,11 +27,17 @@ const BoathouseSelector = ({ boathouses, onBoathouseSelect, selectedBoathouse })
         if (selectedUser) {
             const matchedBoathouse = boathouses.find(b => b.properties.Users === selectedUser);
             if (matchedBoathouse) {
-                setSelectedBoathouseId(matchedBoathouse.properties.OBJECTID);
-                onBoathouseSelect(matchedBoathouse);
+                const newBoathouseId = matchedBoathouse.properties.OBJECTID;
+                if (newBoathouseId !== selectedBoathouseId) {
+                    setSelectedBoathouseId(newBoathouseId);
+                    onBoathouseSelect(matchedBoathouse); // Pass the new boathouse
+                }
+            } else {
+                setSelectedBoathouseId('');
+                setSelectedUser('');
             }
         }
-    }, [selectedUser, boathouses, onBoathouseSelect]);
+    }, [selectedUser, boathouses, onBoathouseSelect, selectedBoathouseId]);
 
     const userCounts = [...new Set(boathouses.map(b => b.properties.Users))];
 
@@ -60,7 +72,7 @@ const BoathouseSelector = ({ boathouses, onBoathouseSelect, selectedBoathouse })
                         const matchedBoathouse = boathouses.find(b => b.properties.OBJECTID === selectedId);
                         setSelectedBoathouseId(selectedId);
                         setSelectedUser(matchedBoathouse ? matchedBoathouse.properties.Users : '');
-                        onBoathouseSelect(matchedBoathouse);
+                        onBoathouseSelect(matchedBoathouse); // Pass the selected boathouse
                     }}
                 >
                     {boathouses.map((boathouse) => (

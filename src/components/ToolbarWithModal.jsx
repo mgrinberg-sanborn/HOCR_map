@@ -126,6 +126,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, setIsEditor }) 
               <MenuItem onClick={() => navigate('/Parking')}>Parking Map</MenuItem>
               <MenuItem onClick={() => navigate('/Friday')}>Friday Map</MenuItem>
               <MenuItem onClick={() => navigate('/SaturdaySunday')}>Saturday/Sunday Map</MenuItem>
+              <MenuItem onClick={() => navigate('/boathouse-browser')}>Boathouse Browser</MenuItem>
               {isAuthenticated && <MenuItem onClick={() => navigate('/station-editor')}>Station Editor</MenuItem>}
             </Menu>
           </>
@@ -134,6 +135,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, setIsEditor }) 
             <Button color="inherit" onClick={() => navigate('/Parking')}>Parking Map</Button>
             <Button color="inherit" onClick={() => navigate('/Friday')}>Friday Map</Button>
             <Button color="inherit" onClick={() => navigate('/SaturdaySunday')}>Saturday/Sunday Map</Button>
+            <Button color="inherit" onClick={() => navigate('/boathouse-browser')}>Boathouse Browser</Button>
             {isAuthenticated && (
               <Button color="inherit" onClick={() => navigate('/station-editor')}>Station Editor</Button>
             )}

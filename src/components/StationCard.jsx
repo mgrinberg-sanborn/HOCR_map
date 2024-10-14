@@ -11,6 +11,7 @@ import BoatFeature from './BoatFeature'; // Assuming BoatFeature is in the same 
 
 function StationCard() {
   const { view, name } = useParams(); // Get view and name from the URL
+  console.log(view, name);
   const [boat, setBoat] = useState(null); // Store boat data
   const mapRef = useRef(null); // Reference for the map element
   const mapInstance = useRef(null); // Keep track of the map instance
@@ -39,7 +40,9 @@ function StationCard() {
         ],
         view: new View({
           center: fromLonLat([boat.lon, boat.lat]),
-          zoom: 15,
+          zoom: 16.5,
+          maxZoom: 18,
+          minZoom: 16,
         }),
       });
 
@@ -76,8 +79,8 @@ function StationCard() {
     <div>
       {/* Apply the dynamic style to the station name */}
       <h2 style={stationNameStyle}>{boat.name}</h2>
-      <p><strong>Category:</strong> {boat.category === 'RC' ? 'River Control' : boat.category === 'SL' ? 'Safety' : boat.category}</p>
-        <p><strong>Zone:</strong> {boat.Zone}<strong>Latitude:</strong> {boat.lat} <strong>Longitude:</strong> {boat.lon}</p>
+      <p><strong>Category:</strong> {boat.category === 'RC' ? 'River Control' : boat.category === 'SL' ? 'Safety' : boat.category} <strong>Zone:</strong> {boat.Zone}</p>
+        <p><strong>Latitude:</strong> {boat.lat} <strong>Longitude:</strong> {boat.lon}</p>
         <p><strong>Water/Land:</strong> {boat.WaterorLand}</p>
         <p><strong>Position:</strong> {boat.position}</p>
       <div ref={mapRef} style={{ width: '100%', height: '400px' }}></div> {/* Map container */}

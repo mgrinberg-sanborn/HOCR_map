@@ -11,6 +11,7 @@ import ToolbarWithModal from './components/ToolbarWithModal';
 import BoathouseBrowser from './components/BoathouseBrowser';
 import { Button } from '@mui/material';
 import StationEditor from './components/StationEditor';
+import WelcomePage from './components/WelcomePage';
 import StationCard from './components/StationCard'; // Import the new component
 import './App.css';
 
@@ -37,11 +38,11 @@ function App() {
   // Update active view based on the URL path
   useEffect(() => {
     const path = location.pathname.split('/')[1]; // Get the first segment of the path
-    if (path) {
-      setActiveView(path);
-      navigate(`/${path}`); // Update the URL to reflect the active view
+    if (path && path !== activeView) {
+      setActiveView(path); // Update active view based on pathname
     }
-  }, [location.pathname]); // Run effect when the pathname changes
+  }, [location.pathname, activeView]); // Run effect when pathname or activeView changes
+  
 
   // Update draggable boats based on active view
   useEffect(() => {
@@ -170,7 +171,15 @@ function App() {
         setActiveView={setActiveView}
       />
       <Routes>
-        <Route path="/" element={
+        {/* Welcome page */}
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/station-editor" element={<StationEditor />} />
+        {/* Add the route for StationCard */}
+        <Route path="/station/:view/:name" element={<StationCard />} />
+        <Route path="/boathouse-browser" element={<BoathouseBrowser />} />
+
+        {/* Add routes for different views */}
+        <Route path="/:view" element={
           <>
             <MapComponent 
               mapBoats={mapBoats} 
@@ -198,34 +207,6 @@ function App() {
               mapBoats={mapBoats} 
               handleDeleteBoat={handleDeleteBoat}
             />
-          </>
-        } />
-        <Route path="/station-editor" element={<StationEditor />} />
-        {/* Add the route for StationCard */}
-        <Route path="/station/:view/:name" element={<StationCard />} />
-        <Route path="/boathouse-browser" element={<BoathouseBrowser />} />
-
-        {/* Add routes for different views */}
-        <Route path="/:view" element={
-          <>
-            <MapComponent 
-              mapBoats={mapBoats} 
-              setMapBoats={setMapBoats} 
-              vectorSourceRef={vectorSourceRef} 
-              mapRef={mapRef} 
-              isAuthenticated={isAuthenticated}  
-              isEditor={isEditor}    
-              activeView={activeView}
-              setActiveView={setActiveView}
-            />
-            {isAuthenticated && isEditor && (
-              <>
-                <BoatToolbar draggableBoats={draggableBoats} handleBoatDrop={handleBoatDrop} activeView={activeView} setActiveView={setActiveView} />
-                <Button variant="outlined" onClick={openDeleteModal}>
-                  Delete a Boat
-                </Button>
-              </>
-            )}
           </>
         } />
       </Routes>
