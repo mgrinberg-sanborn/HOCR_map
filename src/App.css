@@ -1,3 +1,5 @@
+/* Ensure you have imported the carousel's default styles */
+@import 'react-responsive-carousel/lib/styles/carousel.min.css';
 #root {
   /* max-width: 1280px; */
   margin: 0 auto;
@@ -85,4 +87,53 @@
   z-index: 1000; /* Ensure it appears above other elements */
   width: 400px; /* Optional: Set a width for the modal */
   max-width: 90%; /* Optional: Responsive max width */
+}
+
+
+
+/* Custom styles to ensure proper height and layout */
+.carousel {
+    width: 100%;
+    height: auto; /* Adjust height as needed */
+}
+
+.carousel .slide {
+    background: #fff; /* Background color for each slide */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.carousel img {
+    max-width: 100%;
+    height: auto; /* Responsive image */
+}
+
+.carousel-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.carousel-image {
+  width: 100%; /* Makes the image take the full width of the container */
+  height: auto; /* Maintain aspect ratio */
+  max-height: 300px; /* Set a max height for images */
+  object-fit: cover; /* Crop the image to fit the box */
+}
+.carousel .thumbs {
+  justify-content: center;
+  display: flex;
+}
+.carousel .control-arrow {
+  opacity: 1;
+}
+.carousel .control-arrow:hover {
+  background: rgba(0,0,0,0.2);
+}
+.carousel .control-prev.control-arrow:before {
+  border-right: 8px solid black;
+}
+.carousel .control-next.control-arrow:before {
+  border-left: 8px solid black;
 }

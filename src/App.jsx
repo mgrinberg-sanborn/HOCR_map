@@ -8,6 +8,7 @@ import BoatToolbar from './components/BoatToolbar';
 import DeleteBoatModal from './components/DeleteBoatModal';
 import BoatFeature from './components/BoatFeature';
 import ToolbarWithModal from './components/ToolbarWithModal';
+import BoathouseBrowser from './components/BoathouseBrowser';
 import { Button } from '@mui/material';
 import StationEditor from './components/StationEditor';
 import StationCard from './components/StationCard'; // Import the new component
@@ -202,6 +203,8 @@ function App() {
         <Route path="/station-editor" element={<StationEditor />} />
         {/* Add the route for StationCard */}
         <Route path="/station/:view/:name" element={<StationCard />} />
+        <Route path="/boathouse-browser" element={<BoathouseBrowser />} />
+
         {/* Add routes for different views */}
         <Route path="/:view" element={
           <>
