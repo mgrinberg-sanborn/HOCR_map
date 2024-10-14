@@ -45,37 +45,75 @@ function App() {
   }, [activeView]);
 
   const handleBoatDrop = (e, boatId, boatName, category) => {
+    console.log(boatId);
     const map = mapRef.current;
-
+  
     if (!map || !e) {
       console.error('Map is not initialized or event is null.');
       return;
     }
-
+  
     const pixel = map.getEventPixel(e);
     if (!pixel) {
       console.error('Could not get pixel from event.');
       return;
     }
-
+  
     const coords = map.getCoordinateFromPixel(pixel);
     const lonLat = toLonLat(coords);
-
-    const boatFeature = BoatFeature({ lat: lonLat[1], lon: lonLat[0], name: boatName, id: boatId, category });
-    vectorSourceRef.current.addFeature(boatFeature);
-    map.updateSize();
+  
+    const boat = {
+      lat: lonLat[1],
+      lon: lonLat[0],
+      boat_id: boatId, // Keep as boat_id to match your BoatFeature function
+      name: boatName,
+      category,
+    };
+  
+    // First, insert the boat record into the database
     axios.post('/api/boats_view/insert', {
       boat_id: boatId,
       lat: lonLat[1],
       lon: lonLat[0],
       view: activeView,
-    }).then((response) => {
-      setBoats(prevBoats => prevBoats.filter(boat => boat.id !== boatId));
-      setMapBoats(prevBoats => [...prevBoats, { id: boatId, name: boatName, lat: lonLat[1], lon: lonLat[0], category }]);
-    }).catch((error) => {
-      console.error('Error updating boat position', error);
+    })
+    .then((response) => {
+      // Assuming the response contains viewID in the format
+      const viewID = response.data.viewID.id; // Extract viewID directly as a string
+      console.log(viewID);
+  
+      // Now, create the boat feature after confirming the insert
+      const boatFeature = BoatFeature({
+        ...boat,
+        viewID, // Add viewID to the boat object
+      });
+  
+      console.log('Boat feature:', boatFeature);
+      vectorSourceRef.current.addFeature(boatFeature);
+      map.updateSize();
+  
+      // Update boats state with the new boat properties including viewID
+      setBoats(prevBoats => 
+        prevBoats.filter(boat => boat.id !== boatId)
+      );
+  
+      setMapBoats(prevBoats => [
+        ...prevBoats, 
+        { 
+          id: boatId, 
+          name: boatName, 
+          lat: lonLat[1], 
+          lon: lonLat[0], 
+          category, 
+          viewID: viewID // Add the viewID to the new boat's properties
+        }
+      ]);
+    })
+    .catch((error) => {
+      console.error('Error inserting boat position', error);
     });
   };
+  
 
   const handleDeleteBoat = () => {
     const selectedFeature = vectorSourceRef.current.getFeatures().find(feature => feature.get('viewID') === selectedBoat);

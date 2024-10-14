@@ -232,15 +232,15 @@ app.post('/api/boats_view/insert', async (req, res) => {
 
       res.status(200).send('Boat position updated');
     } else {
-      await db('boats_view').insert({
+      const [newId] = await db('boats_view').insert({
         boat_id,
         lat,
         lon,
         rotation,
         view_name: view,
-      });
+      }).returning('id'); // Assuming 'id' is the primary key
 
-      res.status(200).send('Boat position inserted');
+      res.status(200).json({ message: 'Boat position inserted', viewID: newId });
     }
   } catch (error) {
     console.error('Error inserting/updating boat position', error);
