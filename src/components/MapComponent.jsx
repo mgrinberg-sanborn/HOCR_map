@@ -11,7 +11,7 @@ import { Modify } from 'ol/interaction';
 import { Control } from 'ol/control';
 import axios from 'axios';
 import BoatFeature from './BoatFeature';
-import { Style, Icon, Fill, Stroke } from 'ol/style';
+import { Style, Icon, Fill, Stroke, Circle as CircleStyle } from 'ol/style';
 import { Point } from 'ol/geom';
 import Feature from 'ol/Feature';
 import FridayPractice from '../assets/FridayPractice.geojson';
@@ -21,9 +21,12 @@ import '../MapComponent.css';
 const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthenticated, isEditor, activeView }) => {
   const mapElementRef = useRef(null);
   const olMapRef = useRef(null); 
+  const locationLayerRef = useRef(new VectorSource()); 
+
   const [popupContent, setPopupContent] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupPosition, setPopupPosition] = useState([0, 0]);
+
 
   const viewConfigurations = {
     Parking: {
@@ -61,6 +64,7 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
   useEffect(() => {
     const layers = [
       new TileLayer({ source: new OSM() }),
+      new VectorLayer({ source: locationLayerRef.current }) // Layer for the location marker
     ];
 
     // Only add the GeoJSON vector layer if activeView is 'Friday'
@@ -92,6 +96,13 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
     homeButton.innerHTML = '🏠';
     homeButton.addEventListener('click', resetMapView);
     olMap.addControl(new Control({ element: homeButton }));
+
+    const locateButton = document.createElement('button');
+    locateButton.className = 'locate';
+    locateButton.innerHTML = '📍';
+    locateButton.style.marginTop = '5px'; // Positioning below the home button
+    locateButton.addEventListener('click', findMyLocation);
+    olMap.addControl(new Control({ element: locateButton }));
 
     // Modify interaction if user is authenticated and editor
     if (isAuthenticated && isEditor) {
@@ -216,6 +227,37 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
         console.error('Error fetching boat data:', error);
       });
   }, [setMapBoats, vectorSourceRef, activeView]);
+
+  const findMyLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const [lon, lat] = [position.coords.longitude, position.coords.latitude];
+        const coordinates = fromLonLat([lon, lat]);
+
+        // Add a marker at the user's location
+        const locationFeature = new Feature({
+          geometry: new Point(coordinates),
+        });
+        locationFeature.setStyle(
+          new Style({
+            image: new CircleStyle({
+              radius: 7,
+              fill: new Fill({ color: '#3399CC' }),
+              stroke: new Stroke({ color: '#fff', width: 2 })
+            })
+          })
+        );
+        locationLayerRef.current.clear(); // Remove previous marker
+        locationLayerRef.current.addFeature(locationFeature);
+
+        olMapRef.current.getView().setCenter(coordinates);
+        olMapRef.current.getView().setZoom(15);
+      });
+    } else {
+      alert('Geolocation is not supported by this browser.');
+    }
+  };
+
 
   const resetMapView = () => {
     const viewConfig = viewConfigurations[activeView];
