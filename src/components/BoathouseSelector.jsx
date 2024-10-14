@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { MenuItem, Select, FormControl, InputLabel, Box } from '@mui/material';
 
 const BoathouseSelector = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
     const [selectedUser, setSelectedUser] = useState('');
@@ -42,56 +42,69 @@ const BoathouseSelector = ({ boathouses, onBoathouseSelect, selectedBoathouse })
     const userCounts = [...new Set(boathouses.map(b => b.properties.Users))];
 
     return (
-        <div>
-            {/* User Selection */}
-            <FormControl fullWidth margin="normal">
-                <InputLabel id="user-select-label">Select Users</InputLabel>
-                <Select
-                    labelId="user-select-label"
-                    value={selectedUser || ''}
-                    onChange={(event) => {
-                        setSelectedUser(event.target.value);
-                    }}
-                >
-                    {userCounts.map((userCount, index) => (
-                        <MenuItem key={index} value={userCount}>
-                            {userCount}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
+        <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+        >
+            <Box display="flex" gap={2} width="50%" justifyContent="center">
+                {/* User Selection */}
+                <FormControl fullWidth margin="normal" sx={{ minWidth: 200 }}>
+                    <InputLabel id="user-select-label">Select Team</InputLabel>
+                    <Select
+                        label="Select Teams" 
+                        labelId="user-select-label"
+                        value={selectedUser || ''}
+                        onChange={(event) => {
+                            setSelectedUser(event.target.value);
+                        }}
+                    >
+                        {userCounts.map((userCount, index) => (
+                            <MenuItem key={index} value={userCount}>
+                                {userCount}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-            {/* Boathouse Selection */}
-            <FormControl fullWidth margin="normal">
-                <InputLabel id="boathouse-select-label">Select Boathouse</InputLabel>
-                <Select
-                    labelId="boathouse-select-label"
-                    value={selectedBoathouseId || ''}
-                    onChange={(event) => {
-                        const selectedId = event.target.value;
-                        const matchedBoathouse = boathouses.find(b => b.properties.OBJECTID === selectedId);
-                        setSelectedBoathouseId(selectedId);
-                        setSelectedUser(matchedBoathouse ? matchedBoathouse.properties.Users : '');
-                        onBoathouseSelect(matchedBoathouse); // Pass the selected boathouse
-                    }}
-                >
-                    {boathouses.map((boathouse) => (
-                        <MenuItem key={boathouse.properties.OBJECTID} value={boathouse.properties.OBJECTID}>
-                            {boathouse.properties.Boathouse}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
+                {/* Boathouse Selection */}
+                <FormControl fullWidth margin="normal" sx={{ minWidth: 200 }}>
+                    <InputLabel id="boathouse-select-label">Select Boathouse</InputLabel>
+                    <Select
+                        label="Select Boathouse"
+                        labelId="boathouse-select-label"
+                        value={selectedBoathouseId || ''}
+                        onChange={(event) => {
+                            const selectedId = event.target.value;
+                            const matchedBoathouse = boathouses.find(b => b.properties.OBJECTID === selectedId);
+                            setSelectedBoathouseId(selectedId);
+                            setSelectedUser(matchedBoathouse ? matchedBoathouse.properties.Users : '');
+                            onBoathouseSelect(matchedBoathouse); // Pass the selected boathouse
+                        }}
+                    >
+                        {boathouses.map((boathouse) => (
+                            <MenuItem key={boathouse.properties.OBJECTID} value={boathouse.properties.OBJECTID}>
+                                {boathouse.properties.Boathouse}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Box>
 
             {selectedBoathouseId && (
-                <div style={{ marginTop: '20px' }}>
+                <Box mt={3} textAlign="center">
                     <h2>{boathouses.find(b => b.properties.OBJECTID === selectedBoathouseId)?.properties.Boathouse}</h2>
                     <p>Users: {boathouses.find(b => b.properties.OBJECTID === selectedBoathouseId)?.properties.Users}</p>
                     <p>Construction Year: {boathouses.find(b => b.properties.OBJECTID === selectedBoathouseId)?.properties.Construction_Year}</p>
-                    <img src={boathouses.find(b => b.properties.OBJECTID === selectedBoathouseId)?.properties.Image_URL} alt={boathouses.find(b => b.properties.OBJECTID === selectedBoathouseId)?.properties.Boathouse} style={{ height: '200px' }} />
-                </div>
+                    <img
+                        src={boathouses.find(b => b.properties.OBJECTID === selectedBoathouseId)?.properties.Image_URL}
+                        alt={boathouses.find(b => b.properties.OBJECTID === selectedBoathouseId)?.properties.Boathouse}
+                        style={{ height: '200px' }}
+                    />
+                </Box>
             )}
-        </div>
+        </Box>
     );
 };
 

@@ -9,11 +9,13 @@ import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import { Point } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
+import { Control } from 'ol/control';
 
 const BoathouseMap = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
     const mapRef = useRef(); // For the DOM element
     const mapInstanceRef = useRef(); // For the Map instance
     const featureRefs = useRef([]); // For tracking features
+    const defaultCenter = fromLonLat([-71.0968, 42.363421]); // Default center coordinates
 
     useEffect(() => {
         const map = new Map({
@@ -24,17 +26,62 @@ const BoathouseMap = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
                 }),
             ],
             view: new View({
-                center: fromLonLat([-71.0968, 42.363421]), // Default center
+                center: defaultCenter, // Default center
                 zoom: 13,
             }),
         });
 
         mapInstanceRef.current = map;
 
+        // Create the Find My Location button
+        const locateButton = document.createElement('button');
+        locateButton.className = 'locate';
+        locateButton.innerHTML = '📍'; // Location pin emoji
+        locateButton.title = 'Find My Location';
+        locateButton.addEventListener('click', findMyLocation);
+        locateButton.style.marginTop = '5px'; // Adjust position to avoid overlap
+        map.addControl(new Control({ element: locateButton }));
+
+        // Create the Return to Home button
+        const homeButton = document.createElement('button');
+        homeButton.className = 'home-button';
+        homeButton.innerHTML = '🏠'; // Home emoji
+        homeButton.title = 'Return to Home';
+        homeButton.addEventListener('click', returnToHome);
+        homeButton.style.marginTop = '0px'; // Adjust position to avoid overlap
+        map.addControl(new Control({ element: homeButton }));
+
         return () => {
             map.setTarget(undefined);
         };
     }, []);
+
+    // Function to find and center map on the user's location
+    const findMyLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const { latitude, longitude } = position.coords;
+                const coords = fromLonLat([longitude, latitude]);
+
+                mapInstanceRef.current.getView().animate({
+                    center: coords,
+                    zoom: 15,
+                });
+            }, () => {
+                alert('Geolocation not supported or permission denied.');
+            });
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    };
+
+    // Function to return the map to the default home view
+    const returnToHome = () => {
+        mapInstanceRef.current.getView().animate({
+            center: defaultCenter,
+            zoom: 13,
+        });
+    };
 
     useEffect(() => {
         if (boathouses.length > 0) {
@@ -84,13 +131,8 @@ const BoathouseMap = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
                         }
                     };
 
-                    // Debug logs to inspect current and new selections
-                    console.log('Current selected:', selectedBoathouse);
-                    console.log('New selected:', selectedFeature);
-
                     if (!selectedBoathouse || selectedBoathouse.properties.OBJECTID !== selectedFeature.properties.OBJECTID) {
-                        console.log('Selecting new feature:', selectedFeature);
-                        onBoathouseSelect(selectedFeature); // Pass the new format to the callback
+                        onBoathouseSelect(selectedFeature);
                     }
                 });
             });
@@ -124,7 +166,7 @@ const BoathouseMap = ({ boathouses, onBoathouseSelect, selectedBoathouse }) => {
         }
     }, [selectedBoathouse]);
 
-    return <div ref={mapRef} style={{ width: '100%', height: '25vh' }}></div>;
+    return <div ref={mapRef} style={{ width: '100%', height: '40vh' }}></div>;
 };
 
 export default BoathouseMap;
