@@ -64,6 +64,7 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
   useEffect(() => {
     const layers = [
       new TileLayer({ source: new OSM() }),
+      new VectorLayer({ source: vectorSourceRef.current }),
       new VectorLayer({ source: locationLayerRef.current }) // Layer for the location marker
     ];
 
@@ -105,33 +106,30 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
     olMap.addControl(new Control({ element: locateButton }));
 
     // Modify interaction if user is authenticated and editor
+    const modify = new Modify({ source: vectorSourceRef.current });
     if (isAuthenticated && isEditor) {
-      const modify = new Modify({ source: vectorSourceRef.current });
+      olMap.addInteraction(modify);
       modify.on('modifyend', (e) => {
         e.features.forEach((feature) => {
+          const geometry = feature.getGeometry();
+          const [lon, lat] = toLonLat(geometry.getCoordinates());
           const boatId = feature.get('boat_id');
-          if (boatId) {
-            olMap.addInteraction(modify);
-            const geometry = feature.getGeometry();
-            const [lon, lat] = toLonLat(geometry.getCoordinates());
-            const viewID = feature.get('viewID');
-            const rotation = feature.get('rotation') || 0;
-
-            axios.post('/api/boats_view/insert', {
-              boat_id: boatId,
-              lat,
-              lon,
-              rotation,
-              viewID: viewID,
-              view: activeView,
-            })
-            .then((response) => {
-              console.log('Boat position updated:', response);
-            })
-            .catch((error) => {
-              console.error('Error updating boat position:', error);
-            });
-          }
+          const viewID = feature.get('viewID');
+          const rotation = feature.get('rotation') || 0;
+          axios.post('/api/boats_view/insert', {
+            boat_id: boatId,
+            lat,
+            lon,
+            rotation,
+            viewID: viewID,
+            view: activeView,
+          })
+          .then((response) => {
+            console.log('Boat position and rotation updated:', response);
+          })
+          .catch((error) => {
+            console.error('Error updating boat position and rotation:', error);
+          });
         });
       });
     }
