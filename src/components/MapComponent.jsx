@@ -15,6 +15,9 @@ import { Style, Icon, Fill, Stroke, Circle as CircleStyle } from 'ol/style';
 import { Point } from 'ol/geom';
 import Feature from 'ol/Feature';
 import FridayPractice from '../assets/FridayPractice.geojson';
+import BasinBuoys from '../assets/BasinBuoys2.geojson';
+import StartFinish from '../assets/StartFinish.geojson';
+import BasinWarmup from '../assets/BasinWarmup.geojson';
 
 import '../MapComponent.css'; 
 
@@ -80,6 +83,25 @@ const MapComponent = ({ mapBoats, setMapBoats, vectorSourceRef, mapRef, isAuthen
       });
 
       layers.push(geojsonLayer);
+    }
+
+    if (activeView === 'SaturdaySunday') {
+      const geojsonFiles = [
+        { url: BasinBuoys, name: 'Basin Buoys' },
+        { url: StartFinish, name: 'Start/Finish' },
+        // { url: BasinWarmup, name: 'Basin Warmup' },
+      ];
+      geojsonFiles.forEach((file) => {
+        const geojsonVectorSource = new VectorSource({
+          url: file.url,
+          format: new GeoJSON(),
+        });
+        const geojsonLayer = new VectorLayer({
+          source: geojsonVectorSource,
+          style: geojsonStyleFunction,
+        });
+        layers.push(geojsonLayer);
+      });
     }
 
     const olMap = new Map({

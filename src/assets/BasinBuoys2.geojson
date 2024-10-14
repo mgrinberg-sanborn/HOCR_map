@@ -1,0 +1,128 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -71.097201,
+                        42.353913
+                    ],
+                    [
+                        -71.09527,
+                        42.354463
+                    ],
+                    [
+                        -71.09346,
+                        42.354968
+                    ],
+                    [
+                        -71.092535,
+                        42.353244
+                    ],
+                    [
+                        -71.094607,
+                        42.352813
+                    ],
+                    [
+                        -71.096356,
+                        42.352456
+                    ],
+                    [
+                        -71.0972,
+                        42.353913
+                    ]
+                ]
+            },
+            "properties": {
+                "OBJECTID": 11,
+                "Name": null,
+                "Shape__Length": 1397.4455771626651
+            },
+            "id": 11
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -71.096147,
+                        42.354457
+                    ],
+                    [
+                        -71.097812,
+                        42.353785
+                    ],
+                    [
+                        -71.09938,
+                        42.352941
+                    ],
+                    [
+                        -71.101141,
+                        42.352712
+                    ],
+                    [
+                        -71.103038,
+                        42.352583
+                    ]
+                ]
+            },
+            "properties": {
+                "OBJECTID": 19,
+                "Name": "Odd Bow Numbers",
+                "Shape__Length": 838.1794671441417
+            },
+            "id": 19
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -71.096244,
+                        42.354843
+                    ],
+                    [
+                        -71.098857,
+                        42.354042
+                    ],
+                    [
+                        -71.101605,
+                        42.353112
+                    ],
+                    [
+                        -71.103212,
+                        42.353012
+                    ]
+                ]
+            },
+            "properties": {
+                "OBJECTID": 20,
+                "Name": "Even Bow Numbers",
+                "Shape__Length": 830.8437867934492
+            },
+            "id": 20
+        },
+        {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -71.103509,
+                        42.352803
+                    ],
+                    [
+                        -71.107666,
+                        42.352803
+                    ]
+                ]
+            }
+        }
+    ]
+}

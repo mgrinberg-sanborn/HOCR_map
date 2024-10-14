@@ -124,8 +124,8 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, setIsEditor }) 
             </IconButton>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
               <MenuItem onClick={() => navigate('/Parking')}>Parking Map</MenuItem>
-              <MenuItem onClick={() => navigate('/Friday')}>Friday Map</MenuItem>
-              <MenuItem onClick={() => navigate('/SaturdaySunday')}>Saturday/Sunday Map</MenuItem>
+              <MenuItem onClick={() => navigate('/Friday')}>Friday Practice Map</MenuItem>
+              <MenuItem onClick={() => navigate('/SaturdaySunday')}>Racing Map</MenuItem>
               <MenuItem onClick={() => navigate('/boathouse-browser')}>Boathouse Browser</MenuItem>
               {isAuthenticated && <MenuItem onClick={() => navigate('/station-editor')}>Station Editor</MenuItem>}
             </Menu>
@@ -133,8 +133,8 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, setIsEditor }) 
         ) : (
           <div>
             <Button color="inherit" onClick={() => navigate('/Parking')}>Parking Map</Button>
-            <Button color="inherit" onClick={() => navigate('/Friday')}>Friday Map</Button>
-            <Button color="inherit" onClick={() => navigate('/SaturdaySunday')}>Saturday/Sunday Map</Button>
+            <Button color="inherit" onClick={() => navigate('/Friday')}>Friday Practice Map</Button>
+            <Button color="inherit" onClick={() => navigate('/SaturdaySunday')}>Racing Map</Button>
             <Button color="inherit" onClick={() => navigate('/boathouse-browser')}>Boathouse Browser</Button>
             {isAuthenticated && (
               <Button color="inherit" onClick={() => navigate('/station-editor')}>Station Editor</Button>
