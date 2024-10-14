@@ -43,7 +43,7 @@ const WelcomePage = () => {
         <Link to="/Parking">
           <Button variant="contained" color="primary">Parking Launches Map</Button>
         </Link>
-        <Link to="/station/SaturdaySunday">
+        <Link to="/SaturdaySunday">
           <Button variant="contained" color="secondary">River Control & Safety Maps</Button>
         </Link>
         <Link to="/boathouse-browser">

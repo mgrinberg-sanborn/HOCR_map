@@ -123,6 +123,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, setIsEditor }) 
               <MenuIcon />
             </IconButton>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+            <MenuItem onClick={() => navigate('/')}>Home</MenuItem>
               <MenuItem onClick={() => navigate('/Parking')}>Parking Map</MenuItem>
               <MenuItem onClick={() => navigate('/Friday')}>Friday Practice Map</MenuItem>
               <MenuItem onClick={() => navigate('/SaturdaySunday')}>Racing Map</MenuItem>
@@ -132,6 +133,7 @@ const ToolbarWithModal = ({ isAuthenticated, setIsAuthenticated, setIsEditor }) 
           </>
         ) : (
           <div>
+            <Button color="inherit" onClick={() => navigate('/')}>Home</Button>
             <Button color="inherit" onClick={() => navigate('/Parking')}>Parking Map</Button>
             <Button color="inherit" onClick={() => navigate('/Friday')}>Friday Practice Map</Button>
             <Button color="inherit" onClick={() => navigate('/SaturdaySunday')}>Racing Map</Button>
