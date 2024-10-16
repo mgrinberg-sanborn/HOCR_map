@@ -272,10 +272,10 @@ app.delete('/api/boats_view/:view/:id', async (req, res) => {
 
 
 // Static file serving for production
-app.use(express.static(path.join(__dirname, '..', 'dist'))); // Adjust path to the dist directory
+app.use(express.static(path.join(__dirname, '..', 'dist')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.resolve(__dirname, '..', 'dist', 'index.html'));
 });
 
 // Start the server

@@ -28,7 +28,15 @@ const BoatFeature = (boat) => { // Change to take boat directly
     nearest_biobreak_location,
   });
 
-  const fillColor = category === 'SL' ? 'red' : 'yellow';
+  let fillColor;
+
+  if (category === 'SL') {
+    fillColor = 'red';
+  } else if (category === 'MIT') {
+    fillColor = 'white';
+  } else {
+    fillColor = 'yellow';
+  }
 
   let svgIcon;
 

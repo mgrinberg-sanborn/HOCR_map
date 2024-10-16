@@ -12,8 +12,15 @@ const BoatToolbar = ({ draggableBoats, handleBoatDrop, activeView }) => {
           })
           .map((boat) => {
             // Determine the fill color based on category
-            const fillColor = boat.category === 'SL' ? 'red' : 'yellow';
-            let svgIcon;
+            let fillColor;
+
+            if (boat.category === 'SL') {
+              fillColor = 'red';
+            } else if (boat.category === 'MIT') {
+              fillColor = 'white';
+            } else {
+              fillColor = 'yellow';
+            }            let svgIcon;
 
             // Logic for SVG icon based on WaterorLand
             if (boat.WaterorLand === 'Land') {
